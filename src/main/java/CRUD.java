@@ -18,7 +18,7 @@ public class CRUD {
         return input;
     }
 
-    private static int intInRange(String message, int min, int max) {
+    static int intInRange(String message, int min, int max) {
         int value;
         while (true) {
             try {
