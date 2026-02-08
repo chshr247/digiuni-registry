@@ -6,49 +6,74 @@ public class CRUD {
     static ArrayList<Person> students = new ArrayList<>();
     // CRUD: Create Read Update Delete
     // Create
-    public static void create(){
+    private static String readNonEmptyString(String message) {
+        String input;
+        do {
+            System.out.print(message);
+            input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                System.out.println("Error: field cannot be empty.");
+            }
+        } while (input.isEmpty());
+        return input;
+    }
 
-        System.out.println("Enter ID: ");
-        String id = scanner.nextLine();;
+    private static int intInRange(String message, int min, int max) {
+        int value;
+        while (true) {
+            try {
+                System.out.print(message);
+                value = Integer.parseInt(scanner.nextLine());
+                if (value < min || value > max) {
+                    System.out.println("Error: value must be between " + min + " and " + max);
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: enter a number.");
+            }
+        }
+    }
 
-        System.out.print("Enter Full Name: ");
-        String fullName = scanner.nextLine();
-
-        System.out.println("Enter Birth Date: ");
-        String birthDate = scanner.nextLine();
-
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Enter Phone Number: ");
-        String phone = scanner.nextLine();
-
-        System.out.print("Enter Grade (1-6): ");
-        int grade = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Enter Group (1-3): ");
-        int group = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Enter Year of Entering university: ");
-        int year = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Enter choice of study (1 - Budget; 2 - Contract)");
-        String form = "Unknown";
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice == 1) form = "Budget";
-        else if (choice == 2) form = "Contract";
-
-        System.out.println("Enter status of studying (1 - Studying; 2 - Academic leave; 3 - Deducted");
-        String status = "Unknown";
-        int choice2 = Integer.parseInt(scanner.nextLine());
-        if (choice2 == 1) status = "Studying";
-        else if (choice2 == 2) status = "Academic leave";
-        else if (choice2 == 3) status = "Deducted";
+    public static void create() {
+        String id = readNonEmptyString("Enter ID: ");
+        String fullName = readNonEmptyString("Enter Full Name: ");
+        String birthDate = readNonEmptyString("Enter Birth Date: ");
+        String email = readNonEmptyString("Enter Email: ");
+        String phone = readNonEmptyString("Enter Phone Number: ");
+        int grade = intInRange("Enter Grade (1-6): ", 1, 6);
+        int group = intInRange("Enter Group (1-3): ", 1, 3);
+        int year = intInRange("Enter Year of Entering university: ", 1, 2026);
+        System.out.println("Enter choice of study:");
+        System.out.println("1 - Budget");
+        System.out.println("2 - Contract");
+        String form;
+        int choice = intInRange("Your choice: ", 1, 2);
+        if (choice == 1) {
+            form = "Budget";
+        } else {
+            form = "Contract";
+        }
+        System.out.println("Enter status of studying:");
+        System.out.println("1 - Studying");
+        System.out.println("2 - Academic leave");
+        System.out.println("3 - Deducted");
+        String status;
+        int choice2 = intInRange("Your choice: ", 1, 3);
+        if (choice2 == 1) {
+            status = "Studying";
+        } else if (choice2 == 2) {
+            status = "Academic leave";
+        } else {
+            status = "Deducted";
+        }
 
         Person newStudent = new Student(id, fullName, birthDate, email, phone, grade, group, year, form, status);
+
         students.add(newStudent);
         System.out.println("Student registered successfully!");
     }
+
 
     // Read
     public static void showStudents() {
@@ -61,17 +86,15 @@ public class CRUD {
 
     // Update
     public static void update() {
-        System.out.println("Enter student's ID for updating: ");
-        String id = scanner.nextLine();
+
+        String id = readNonEmptyString("Enter student's ID for updating: ");
 
         Student targetStudent = null;
 
         for (Person p : students) {
-            if (p.getId().equals(id)) {
-                if (p instanceof Student) {
-                    targetStudent = (Student) p;
-                    break;
-                }
+            if (p.getId().equals(id) && p instanceof Student) {
+                targetStudent = (Student) p;
+                break;
             }
         }
 
@@ -81,76 +104,59 @@ public class CRUD {
         }
 
         System.out.println("Student found: " + targetStudent.getFullName());
+
         System.out.println("""
-        Enter number of what you want to update:
-        1 - ID
-        2 - Name
-        3 - Birthdate
-        4 - Email
-        5 - Phone Number
-        6 - Grade
-        7 - Group
-        8 - Year
-        9 - Form of Study
-        10 - Status
-        0 - Exit""");
+    Enter number of what you want to update:
+    1 - ID
+    2 - Name
+    3 - Birthdate
+    4 - Email
+    5 - Phone Number
+    6 - Grade
+    7 - Group
+    8 - Year
+    9 - Form of Study
+    10 - Status
+    0 - Exit
+    """);
 
-        try {
-            int choice = Integer.parseInt(scanner.nextLine());
+        int choice = intInRange("Your choice: ", 0, 10);
 
-            switch (choice) {
-                case 1 -> {
-                    System.out.print("Enter new ID: ");
-                    targetStudent.setId(scanner.nextLine());
-                }
-                case 2 -> {
-                    System.out.print("Enter new Full Name: ");
-                    targetStudent.setFullName(scanner.nextLine());
-                }
-                case 3 -> {
-                    System.out.print("Enter new Birthdate: ");
-                    targetStudent.setBirthDate(scanner.nextLine());
-                }
-                case 4 -> {
-                    System.out.print("Enter new Email: ");
-                    targetStudent.setEmail(scanner.nextLine());
-                }
-                case 5 -> {
-                    System.out.print("Enter new Phone Number: ");
-                    targetStudent.setPhone(scanner.nextLine());
-                }
-                case 6 -> {
-                    System.out.print("Enter new Grade: ");
-                    targetStudent.setGrade(Integer.parseInt(scanner.nextLine()));
-                }
-                case 7 -> {
-                    System.out.print("Enter new Group: ");
-                    targetStudent.setGroup(Integer.parseInt(scanner.nextLine()));
-                }
-                case 8 -> {
-                    System.out.print("Enter new Year: ");
-                    targetStudent.setYear(Integer.parseInt(scanner.nextLine()));
-                }
-                case 9 -> {
-                    System.out.print("Enter new Form of Study: ");
-                    targetStudent.setFormOfStudy(scanner.nextLine());
-                }
-                case 10 -> {
-                    System.out.print("Enter new Status: ");
-                    targetStudent.setStatus(scanner.nextLine());
-                }
-                case 0 -> System.out.println("Exiting update menu.");
-                default -> System.out.println("Invalid option.");
+        switch (choice) {
+            case 1 -> targetStudent.setId(readNonEmptyString("Enter new ID: "));
+            case 2 -> targetStudent.setFullName(readNonEmptyString("Enter new Full Name: "));
+            case 3 -> targetStudent.setBirthDate(readNonEmptyString("Enter new Birthdate: "));
+            case 4 -> targetStudent.setEmail(readNonEmptyString("Enter new Email: "));
+            case 5 -> targetStudent.setPhone(readNonEmptyString("Enter new Phone Number: "));
+            case 6 -> targetStudent.setGrade(intInRange("Enter new Grade (1-6): ", 1, 6));
+            case 7 -> targetStudent.setGroup(intInRange("Enter new Group (1-3): ", 1, 3));
+            case 8 -> targetStudent.setYear(intInRange("Enter new Year: ", 2000, 2100));
+            case 9 -> {
+                System.out.println("1 - Budget");
+                System.out.println("2 - Contract");
+                int f = intInRange("Your choice: ", 1, 2);
+                targetStudent.setFormOfStudy(f == 1 ? "Budget" : "Contract");
             }
+            case 10 -> {
+                System.out.println("1 - Studying");
+                System.out.println("2 - Academic leave");
+                System.out.println("3 - Deducted");
+                int s = intInRange("Your choice: ", 1, 3);
 
-            if (choice != 0) {
-                System.out.println("Student information updated successfully!");
+                if (s == 1) targetStudent.setStatus("Studying");
+                else if (s == 2) targetStudent.setStatus("Academic leave");
+                else targetStudent.setStatus("Deducted");
             }
-
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Please enter a valid number for Grade/Group/Year.");
+            case 0 -> {
+                System.out.println("Exiting update menu.");
+                return;
+            }
+            default -> System.out.println("Invalid option.");
         }
+
+        System.out.println("Student information updated successfully!");
     }
+
 
     public static void delete() {
         System.out.println("Enter student ID to remove: ");
@@ -163,5 +169,5 @@ public class CRUD {
             System.out.println("Error: No student found with ID " + id);
         }
     }
-}
 
+}
