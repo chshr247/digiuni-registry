@@ -12,10 +12,11 @@ public class Main {
                     5. Search Student by name
                     6. Search Student by group
                     7. Search Student by grade
+                    8. List of all students by grade
                     0. Exit
                     """);
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 7);
+            int choice = CRUD.intInRange("Your choice: ", 0, 8);
 
             switch (choice) {
                 case 1 -> CRUD.create();
@@ -25,6 +26,7 @@ public class Main {
                 case 5 -> CRUD.searchByFullName();
                 case 6 -> CRUD.searchByGroup();
                 case 7 -> CRUD.searchByGrade();
+                case 8 -> CRUD.showAllStudentsByCourse();
                 case 0 -> running = false;
             }
         }

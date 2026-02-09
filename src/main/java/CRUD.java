@@ -127,6 +127,28 @@ public class CRUD {
             System.out.println("No students found");
         }
     }
+    public static void showAllStudentsByCourse() {
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
+
+        for (int grade = 1; grade <= 6; grade++) {
+            System.out.println("*==* Grade " + grade + "*==*");
+            boolean found = false;
+            for (Person p : students) {
+                if (p instanceof Student s && s.getGrade() == grade) {
+                    System.out.println(s);
+                    found = true;
+                }
+            }
+            if (!found) {
+                System.out.println("There are no students in this grade");
+            }
+
+        }
+    }
+
 
 
     // Update
