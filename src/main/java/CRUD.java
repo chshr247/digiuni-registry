@@ -84,6 +84,51 @@ public class CRUD {
         }
     }
 
+    public static void searchByFullName() {
+        String founder = readNonEmptyString("Enter full name (or part of it): ");
+        boolean found =  false;
+        for (Person p : students) {
+            if (p instanceof Student s && s.getFullName().contains(founder)) {
+                System.out.println(s);
+                found = true;
+            }
+        }
+        if(!found){
+            System.out.println("No students found");
+        }
+    }
+
+    public static void searchByGroup() {
+        int group = intInRange("Enter group (1-3): ", 1, 3);
+        boolean found = false;
+
+        for (Person p : students) {
+            if (p instanceof Student s && s.getGroup() == group) {
+                System.out.println(s);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No students found");
+        }
+    }
+    public static void searchByGrade() {
+        int grade = intInRange("Enter grade (1-6): ", 1, 6);
+        boolean found = false;
+
+        for (Person p : students) {
+            if (p instanceof Student s && s.getGrade() == grade) {
+                System.out.println(s);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No students found");
+        }
+    }
+
+
     // Update
     public static void update() {
 
