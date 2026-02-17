@@ -16,7 +16,7 @@ public class Main {
                     0. Exit
                     """);
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 8);
+            int choice = CRUD.intInRange("Your choice: ", 0, 10);
 
             switch (choice) {
                 case 1 -> CRUD.create();
@@ -27,6 +27,8 @@ public class Main {
                 case 6 -> CRUD.searchByGroup();
                 case 7 -> CRUD.searchByGrade();
                 case 8 -> CRUD.showAllStudentsByCourse();
+                case 9 -> CRUDForFaculty.create();
+                case 10 -> CRUDForFaculty.showFaculties();
                 case 0 -> running = false;
             }
         }
