@@ -4,6 +4,7 @@ import java.util.Scanner;
 public class CRUD {
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Person> students = new ArrayList<>();
+    public static int counterOfStudents = 0;
     // CRUD: Create Read Update Delete
     // Create
     private static String readNonEmptyString(String message) {
@@ -36,7 +37,8 @@ public class CRUD {
     }
 
     public static void create() {
-        String id = readNonEmptyString("Enter ID: ");
+        counterOfStudents++;
+        String id = String.valueOf(counterOfStudents);
         String fullName = readNonEmptyString("Enter Full Name: ");
         String birthDate = readNonEmptyString("Enter Birth Date: ");
         String email = readNonEmptyString("Enter Email: ");
