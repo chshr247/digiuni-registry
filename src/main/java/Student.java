@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class Student extends Person{
@@ -76,7 +77,7 @@ public class Student extends Person{
                 '}';
     }
 
-    public Student(String id, String fullName, String birthDate, String email, String phone, int grade, int group, int year, String formOfStudy, String status) {
+    public Student(String id, String fullName, LocalDate birthDate, String email, String phone, int grade, int group, int year, String formOfStudy, String status) {
         super(id, fullName, birthDate, email, phone);
         this.grade = grade;
         this.group = group;

@@ -1,9 +1,11 @@
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Objects;
 
 public class Person {
     String id;
     String fullName;
-    String birthDate;
+    LocalDate birthDate;
     String email;
     String phone;
 
@@ -46,11 +48,15 @@ public class Person {
         this.fullName = fullName;
     }
 
-    public String getBirthDate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(String birthDate) {
+    public int getAge() {
+        return Period.between(birthDate, LocalDate.now()).getYears();
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 
@@ -70,7 +76,7 @@ public class Person {
         this.phone = phone;
     }
 
-    public Person(String id, String fullName, String birthDate, String email, String phone) {
+    public Person(String id, String fullName, LocalDate birthDate, String email, String phone) {
         this.id = id;
         this.fullName = fullName;
         this.birthDate = birthDate;

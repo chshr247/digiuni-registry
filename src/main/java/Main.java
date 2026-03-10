@@ -1,6 +1,20 @@
+import java.time.LocalDate;
+import java.time.Month;
+
 public class Main {
     public static void main(String[] args) {
         boolean running = true;
+        Person newStudent = new Student("1",
+                "Viacheslav Mokliak Serhiyovych",
+                LocalDate.of(2007, Month.JANUARY, 28),
+                "slava.mokliak@gmail.com",
+                "+380509831589",
+                1,
+                2,
+                2025,
+                "Budget",
+                "Studying");
+        CRUD.students.add(newStudent);
 
         while (running) {
             System.out.println("""
@@ -13,6 +27,8 @@ public class Main {
                     6. Search Student by group
                     7. Search Student by grade
                     8. List of all students by grade
+                    9. Create Faculty
+                    10. Show all Faculties
                     0. Exit
                     """);
 
