@@ -1,3 +1,6 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -36,11 +39,25 @@ public class CRUD {
         }
     }
 
+    static LocalDate readDate(String message) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        while (true) {
+            System.out.print(message + " (dd-MM-yyyy): ");
+            String raw = scanner.nextLine().trim();
+            try {
+                return LocalDate.parse(raw, fmt);
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: use format dd-MM-yyyy");
+            }
+        }
+    }
+
+
     public static void create() {
         counterOfStudents++;
         String id = String.valueOf(counterOfStudents);
         String fullName = readNonEmptyString("Enter Full Name: ");
-        String birthDate = readNonEmptyString("Enter Birth Date: ");
+        LocalDate birthDate = readDate("Enter Birth Date: ");
         String email = readNonEmptyString("Enter Email: ");
         String phone = readNonEmptyString("Enter Phone Number: ");
         int grade = intInRange("Enter Grade (1-6): ", 1, 6);
@@ -194,7 +211,7 @@ public class CRUD {
         switch (choice) {
             case 1 -> targetStudent.setId(readNonEmptyString("Enter new ID: "));
             case 2 -> targetStudent.setFullName(readNonEmptyString("Enter new Full Name: "));
-            case 3 -> targetStudent.setBirthDate(readNonEmptyString("Enter new Birthdate: "));
+            case 3 -> targetStudent.setBirthDate(readDate("Enter new Birthdate: "));
             case 4 -> targetStudent.setEmail(readNonEmptyString("Enter new Email: "));
             case 5 -> targetStudent.setPhone(readNonEmptyString("Enter new Phone Number: "));
             case 6 -> targetStudent.setGrade(intInRange("Enter new Grade (1-6): ", 1, 6));

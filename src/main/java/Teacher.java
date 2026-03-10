@@ -1,13 +1,14 @@
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class Teacher extends Person {
     String post;
     String degree;
     String academicRank;
-    String startedJobDate;
+    LocalDate startedJobDate;
     int rate;
 
-    public Teacher(String id, String fullName, String birthDate, String email, String phone, String post, String degree, String academicRank, String startedJobDate, int rate) {
+    public Teacher(String id, String fullName, LocalDate birthDate, String email, String phone, String post, String degree, String academicRank, LocalDate startedJobDate, int rate) {
         super(id, fullName, birthDate, email, phone);
         this.post = post;
         this.degree = degree;
@@ -69,11 +70,11 @@ public class Teacher extends Person {
         this.academicRank = academicRank;
     }
 
-    public String getStartedJobDate() {
+    public LocalDate getStartedJobDate() {
         return startedJobDate;
     }
 
-    public void setStartedJobDate(String startedJobDate) {
+    public void setStartedJobDate(LocalDate startedJobDate) {
         this.startedJobDate = startedJobDate;
     }
 
