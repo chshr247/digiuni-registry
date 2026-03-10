@@ -1,11 +1,13 @@
+import java.util.ArrayList;
 import java.util.Objects;
 
-public class Faculty{
+public class Faculty {
     String id;
     String fullName;
     String shortName;
     String dean;
     String contact;
+    ArrayList<Department> departments;
 
     public String getId() {
         return id;
@@ -47,24 +49,33 @@ public class Faculty{
         this.contact = contact;
     }
 
+    public ArrayList<Department> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(ArrayList<Department> departments) {
+        this.departments = departments;
+    }
+
     public Faculty(String id, String fullName, String shortName, String dean, String contact) {
         this.id = id;
         this.fullName = fullName;
         this.shortName = shortName;
         this.dean = dean;
         this.contact = contact;
+        this.departments = new ArrayList<>();
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Faculty faculty = (Faculty) o;
-        return Objects.equals(id, faculty.id) && Objects.equals(fullName, faculty.fullName) && Objects.equals(shortName, faculty.shortName) && Objects.equals(dean, faculty.dean) && Objects.equals(contact, faculty.contact);
+        return Objects.equals(id, faculty.id) && Objects.equals(fullName, faculty.fullName) && Objects.equals(shortName, faculty.shortName) && Objects.equals(dean, faculty.dean) && Objects.equals(contact, faculty.contact) && Objects.equals(departments, faculty.departments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fullName, shortName, dean, contact);
+        return Objects.hash(id, fullName, shortName, dean, contact, departments);
     }
 
     @Override
@@ -75,7 +86,7 @@ public class Faculty{
                 ", shortName='" + shortName + '\'' +
                 ", dean='" + dean + '\'' +
                 ", contact='" + contact + '\'' +
+                ", departmentsCount=" + departments.size() +
                 '}';
     }
 }
-
