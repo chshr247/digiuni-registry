@@ -52,8 +52,29 @@ public class CRUD {
         }
     }
 
+    private static Department chooseDepartment() {
+        String facultyId = readNonEmptyString("Enter faculty ID: ");
+        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
+
+        if (faculty == null) {
+            System.out.println("No faculty found for this ID.");
+            return null;
+        }
+
+        String departmentId = readNonEmptyString("Enter department ID: ");
+        Department department = CRUDForDepartment.findDepartmentById(faculty.getDepartments(), departmentId);
+
+        if (department == null) {
+            System.out.println("No department found for this ID.");
+            return null;
+        }
+
+        return department;
+    }
 
     public static void create() {
+        Department department = chooseDepartment();
+        if (department == null) return;
         counterOfStudents++;
         String id = String.valueOf(counterOfStudents);
         String fullName = readNonEmptyString("Enter Full Name: ");

@@ -1,6 +1,5 @@
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
@@ -46,10 +45,16 @@ public class Main {
                 System.out.println("8. Delete Student");
                 System.out.println("9. Create Faculty");
                 System.out.println("10. Show Faculties");
+                System.out.println("11. Update Faculty");
+                System.out.println("12. Delete Faculty");
+                System.out.println("13. Create Department for Faculty");
+                System.out.println("14. Show Departments of Faculty");
+                System.out.println("15. Update Department of Faculty");
+                System.out.println("16. Delete Department of Faculty");
             }
             System.out.println("0. Exit");
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 10);
+            int choice = CRUD.intInRange("Your choice: ", 0, 16);
 
             try {
                 switch (choice) {
@@ -63,9 +68,16 @@ public class Main {
                     case 8 -> { auth.requireAdmin(); CRUD.delete(); }
                     case 9 -> { auth.requireAdmin(); CRUDForFaculty.create(); }
                     case 10 -> { auth.requireAuth(); CRUDForFaculty.showFaculties(); }
+                    case 11 -> { auth.requireAdmin(); CRUDForFaculty.update(); }
+                    case 12 -> { auth.requireAdmin(); CRUDForFaculty.deleteFaculty(); }
+                    case 13 -> { auth.requireAdmin(); CRUDForDepartment.createDepartment(); }
+                    case 14 -> { auth.requireAuth(); CRUDForDepartment.showDepartmentsOfFaculty(); }
+                    case 15 -> { auth.requireAdmin(); CRUDForDepartment.updateDepartment(); }
+                    case 16 -> { auth.requireAdmin(); CRUDForDepartment.deleteDepartment(); }
                     case 0 -> { auth.logout(); running = false; }
                 }
-            } catch (RuntimeException e) {}
+            } catch (RuntimeException e) {
+            }
         }
 
         System.out.println("Program finished.");
