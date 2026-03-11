@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.util.Optional;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -8,6 +9,12 @@ public class CRUDForTeacher {
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Teacher> teachers = new ArrayList<>();
     public static int counterOfTeachers = 0;
+
+    public static class TeacherNotFoundException extends RuntimeException {
+        public TeacherNotFoundException(String message) {
+            super(message);
+        }
+    }
 
     private static String readNonEmptyString(String message) {
         String input;
@@ -74,23 +81,27 @@ public class CRUDForTeacher {
             teachers.forEach(System.out::println);
         }
     }
+    public static Optional<Teacher> findTeacherByIdOptional(String id) {
+        return teachers.stream()
+                .filter(teacher -> teacher.getId().equals(id))
+                .findFirst();
+    }
+
+    public static Teacher findTeacherById(String id) {
+        return findTeacherByIdOptional(id)
+                .orElseThrow(() -> new TeacherNotFoundException("No teacher found for ID: " + id));
+    }
 
     public static void update() {
         String id = readNonEmptyString("Enter teacher ID for updating: ");
-        Teacher targetTeacher = null;
 
-        for (Teacher teacher : teachers) {
-            if (teacher.getId().equals(id)) {
-                targetTeacher = teacher;
-                break;
-            }
-        }
-
-        if (targetTeacher == null) {
-            System.out.println("No teacher found for this ID: " + id);
+        Teacher targetTeacher;
+        try {
+            targetTeacher = findTeacherById(id);
+        } catch (TeacherNotFoundException e) {
+            System.out.println(e.getMessage());
             return;
         }
-
         System.out.println("""
                 Enter number of what you want to update:
                 1 - ID

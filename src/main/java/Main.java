@@ -37,20 +37,25 @@ public class Main {
             System.out.println("3. Search by group");
             System.out.println("4. Search by grade");
             System.out.println("5. List by grade");
+            System.out.println("6. Show Faculties");
+            System.out.println("7. Show Teachers");
 
             if (auth.isAdmin()) {
                 System.out.println("--- ADMIN only ---");
-                System.out.println("6. Add Student");
-                System.out.println("7. Update Student");
-                System.out.println("8. Delete Student");
-                System.out.println("9. Create Faculty");
-                System.out.println("10. Show Faculties");
-                System.out.println("11. Update Faculty");
-                System.out.println("12. Delete Faculty");
-                System.out.println("13. Create Department for Faculty");
-                System.out.println("14. Show Departments of Faculty");
-                System.out.println("15. Update Department of Faculty");
-                System.out.println("16. Delete Department of Faculty");
+                System.out.println("8. Add Student");
+                System.out.println("9. Update Student");
+                System.out.println("10. Delete Student");
+                System.out.println("11. Create Faculty");
+                System.out.println("12. Update Faculty");
+                System.out.println("13. Delete Faculty");
+                System.out.println("14. Create Department for Faculty");
+                System.out.println("15. Show Departments of Faculty");
+                System.out.println("16. Update Department of Faculty");
+                System.out.println("17. Delete Department of Faculty");
+                System.out.println("18. Add Teacher");
+                System.out.println("19. Update Teacher");
+                System.out.println("20. Delete Teacher");
+
             }
             System.out.println("0. Exit");
 
@@ -74,6 +79,10 @@ public class Main {
                     case 14 -> { auth.requireAuth(); CRUDForDepartment.showDepartmentsOfFaculty(); }
                     case 15 -> { auth.requireAdmin(); CRUDForDepartment.updateDepartment(); }
                     case 16 -> { auth.requireAdmin(); CRUDForDepartment.deleteDepartment(); }
+                    case 17 -> { auth.requireAdmin(); CRUDForTeacher.create(); }
+                    case 18 -> { auth.requireAuth(); CRUDForTeacher.showTeachers(); }
+                    case 19 -> { auth.requireAdmin(); CRUDForTeacher.update(); }
+                    case 20 -> { auth.requireAdmin(); CRUDForTeacher.delete(); }
                     case 0 -> { auth.logout(); running = false; }
                 }
             } catch (RuntimeException e) {
