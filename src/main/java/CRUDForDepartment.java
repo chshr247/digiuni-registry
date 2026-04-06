@@ -60,6 +60,7 @@ public class CRUDForDepartment {
 
         Department newDepartment = new Department(id, fullName, head, cabinet);
         faculty.getDepartments().add(newDepartment);
+        newDepartment.setFaculty(faculty);
         System.out.println("Department added successfully to faculty " + faculty.getFullName());
     }
 

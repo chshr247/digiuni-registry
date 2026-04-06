@@ -44,7 +44,30 @@ public class CRUDForTeacher {
             }
         }
     }
+
+    private static Department chooseDepartment() {
+        String facultyId = readNonEmptyString("Enter faculty ID: ");
+        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
+
+        if (faculty == null) {
+            System.out.println("No faculty found for this ID.");
+            return null;
+        }
+
+        String departmentId = readNonEmptyString("Enter department ID: ");
+        Department department = CRUDForDepartment.findDepartmentById(faculty.getDepartments(), departmentId);
+
+        if (department == null) {
+            System.out.println("No department found for this ID.");
+            return null;
+        }
+
+        return department;
+    }
+
     public static void create() {
+        Department department = chooseDepartment();
+        if (department == null) return;
         counterOfTeachers++;
         String id = String.valueOf(counterOfTeachers);
         String fullName = readNonEmptyString("Enter Full Name: ");
@@ -71,6 +94,8 @@ public class CRUDForTeacher {
         );
 
         teachers.add(newTeacher);
+        newTeacher.setDepartment(department);
+        department.addTeacher(newTeacher);
         System.out.println("Teacher registered successfully!");
     }
 
@@ -142,9 +167,18 @@ public class CRUDForTeacher {
 
     public static void delete() {
         String id = readNonEmptyString("Enter teacher ID to remove: ");
-        boolean isRemoved = teachers.removeIf(teacher -> teacher.getId().equals(id));
-
-        if (isRemoved) {
+        Teacher teacherToRemove = null;
+        for (Teacher t : teachers) {
+            if (t.getId().equals(id)) {
+                teacherToRemove = t;
+                break;
+            }
+        }
+        if (teacherToRemove != null) {
+            teachers.remove(teacherToRemove);
+            if (teacherToRemove.getDepartment() != null) {
+                teacherToRemove.getDepartment().removeTeacher(teacherToRemove);
+            }
             System.out.println("Success: Teacher with ID " + id + " has been removed.");
         } else {
             System.out.println("Error: No teacher found with ID " + id);

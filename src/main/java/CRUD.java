@@ -111,6 +111,8 @@ public class CRUD {
         Person newStudent = new Student(id, fullName, birthDate, email, phone, grade, group, year, form, status);
 
         students.add(newStudent);
+        ((Student) newStudent).setDepartment(department);
+        department.addStudent((Student) newStudent);
         System.out.println("Student registered successfully!");
     }
 
@@ -268,9 +270,18 @@ public class CRUD {
     public static void delete() {
         System.out.println("Enter student ID to remove: ");
         String id = scanner.nextLine();
-        boolean isRemoved = students.removeIf(student -> student.getId().equals(id));
-
-        if (isRemoved) {
+        Student studentToRemove = null;
+        for (Person p : students) {
+            if (p.getId().equals(id) && p instanceof Student) {
+                studentToRemove = (Student) p;
+                break;
+            }
+        }
+        if (studentToRemove != null) {
+            students.remove(studentToRemove);
+            if (studentToRemove.getDepartment() != null) {
+                studentToRemove.getDepartment().removeStudent(studentToRemove);
+            }
             System.out.println("Success: Student with ID " + id + " has been removed.");
         } else {
             System.out.println("Error: No student found with ID " + id);

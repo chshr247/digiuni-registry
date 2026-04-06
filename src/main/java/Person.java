@@ -1,80 +1,20 @@
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Objects;
 
-public class Person {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public sealed class Person permits Student, Teacher {
     String id;
     String fullName;
     LocalDate birthDate;
     String email;
     String phone;
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id='" + id + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", birthDate='" + birthDate + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Person person = (Person) o;
-        return Objects.equals(id, person.id) && Objects.equals(fullName, person.fullName) && Objects.equals(birthDate, person.birthDate) && Objects.equals(email, person.email) && Objects.equals(phone, person.phone);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, fullName, birthDate, email, phone);
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public int getAge() {
-        return Period.between(birthDate, LocalDate.now()).getYears();
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    AuthUser authUser;
 
     public Person(String id, String fullName, LocalDate birthDate, String email, String phone) {
         this.id = id;
@@ -82,5 +22,9 @@ public class Person {
         this.birthDate = birthDate;
         this.email = email;
         this.phone = phone;
+    }
+
+    public int getAge() {
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 }

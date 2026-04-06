@@ -2,6 +2,7 @@ public class AuthUser {
     private String username;
     private String password;
     private Role role;
+    private Person person;
 
     public AuthUser(String username, String password, Role role) {
         this.username = username;
@@ -19,5 +20,22 @@ public class AuthUser {
 
     public Role getRole() {
         return role;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthUser{" +
+                "username='" + username + '\'' +
+                ", role=" + role +
+                ", person='" + (person != null ? person.getFullName() : "null") + '\'' +
+                '}';
     }
 }
