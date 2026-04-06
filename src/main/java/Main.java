@@ -70,7 +70,8 @@ public class Main {
                     case 4 -> { auth.requireManager(); showUpdateMenu(auth); }
                     case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
                     case 6 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
-                    case 7 -> { auth.requireAuth(); StreamReports.showReportsMenu(); }
+                    case 7 -> { auth.requireAuth(); StreamReports.showReportsMenu();
+                        RegistryStorageService.showStorageMenu();}
                     case 8 -> { auth.requireAuth(); ReflectionModule.showReflectionMenu(); }
                     case 0 -> { auth.logout(); running = false; }
                 }
