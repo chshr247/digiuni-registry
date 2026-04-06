@@ -13,7 +13,9 @@ public class Faculty {
     String shortName;
     String dean;
     String contact;
+    @lombok.ToString.Exclude
     ArrayList<Department> departments;
+    @lombok.ToString.Exclude
     University university;
 
     public Faculty(String id, String fullName, String shortName, String dean, String contact) {
@@ -23,5 +25,17 @@ public class Faculty {
         this.dean = dean;
         this.contact = contact;
         this.departments = new ArrayList<>();
+    }
+
+    @Override
+    public String toString() {
+        return "Faculty{" +
+                "id='" + id + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", shortName='" + shortName + '\'' +
+                ", dean='" + dean + '\'' +
+                ", contact='" + contact + '\'' +
+                ", university=" + (university != null ? university.getFullName() : "None") +
+                '}';
     }
 }

@@ -9,6 +9,7 @@ public class AuthUser {
     private final String username;
     private String password;
     private Role role;
+    @lombok.ToString.Exclude
     private Person person;
 
     public AuthUser(String username, String password, Role role) {

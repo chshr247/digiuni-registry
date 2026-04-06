@@ -19,6 +19,17 @@ public class Main {
 
         boolean running = true;
 
+        // Test data
+        University testUniversity = new University("Test University", "TU", "City", "Address");
+        Faculty testFaculty = new Faculty("1", "Faculty of Computer Science", "FCS", "Dean Name", "contact@fcs.ua");
+        testFaculty.setUniversity(testUniversity);
+        testUniversity.addFaculty(testFaculty);
+        CRUDForFaculty.faculties.add(testFaculty);
+
+        Department testDepartment = new Department("1", "Department of Programming", "Head Name", 305);
+        testFaculty.getDepartments().add(testDepartment);
+        testDepartment.setFaculty(testFaculty);
+
         Person newStudent = new Student("1",
                 "Viacheslav Mokliak Serhiyovych",
                 LocalDate.of(2007, Month.JANUARY, 28),
@@ -30,6 +41,8 @@ public class Main {
                 "Budget",
                 "Studying");
         CRUD.students.add(newStudent);
+        ((Student) newStudent).setDepartment(testDepartment);
+        testDepartment.addStudent((Student) newStudent);
 
         while (running) {
             System.out.println("""

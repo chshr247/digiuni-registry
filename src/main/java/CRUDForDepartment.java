@@ -135,7 +135,21 @@ public class CRUDForDepartment {
         }
 
         String departmentId = readNonEmptyString("Enter department ID to remove: ");
-        boolean isRemoved = faculty.getDepartments().removeIf(department -> department.getId().equals(departmentId));
+        Department departmentToRemove = findDepartmentById(faculty.getDepartments(), departmentId);
+
+        if (departmentToRemove == null) {
+            System.out.println("Error: No department found with ID " + departmentId);
+            return;
+        }
+
+        for (Student student : departmentToRemove.getStudents()) {
+            student.setDepartment(null);
+        }
+        for (Teacher teacher : departmentToRemove.getTeachers()) {
+            teacher.setDepartment(null);
+        }
+
+        boolean isRemoved = faculty.getDepartments().remove(departmentToRemove);
 
         if (isRemoved) {
             System.out.println("Success: Department with ID " + departmentId + " has been removed.");

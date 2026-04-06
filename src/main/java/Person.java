@@ -14,6 +14,7 @@ public sealed class Person permits Student, Teacher {
     LocalDate birthDate;
     String email;
     String phone;
+    @lombok.ToString.Exclude
     AuthUser authUser;
 
     public Person(String id, String fullName, LocalDate birthDate, String email, String phone) {

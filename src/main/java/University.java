@@ -12,6 +12,7 @@ public class University {
     String shortName;
     String city;
     String address;
+    @lombok.ToString.Exclude
     ArrayList<Faculty> faculties;
 
     public University(String fullName, String shortName, String city, String address) {

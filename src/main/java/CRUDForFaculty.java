@@ -66,12 +66,36 @@ public class CRUDForFaculty {
 
     public static void deleteFaculty() {
         String id = readNonEmptyString("Enter faculty ID to remove: ");
-        boolean isRemoved = faculties.removeIf(faculty -> faculty.getId().equals(id));
+        Faculty facultyToRemove = findFacultyById(id);
+
+        if (facultyToRemove == null) {
+            System.out.println("Error: No faculty found with ID " + id);
+            return;
+        }
+
+        // Remove references from departments
+        for (Department department : facultyToRemove.getDepartments()) {
+            department.setFaculty(null);
+            for (Student student : department.getStudents()) {
+                student.setDepartment(null);
+            }
+            for (Teacher teacher : department.getTeachers()) {
+                teacher.setDepartment(null);
+            }
+        }
+
+        // Remove from university if exists
+        if (facultyToRemove.getUniversity() != null) {
+            facultyToRemove.getUniversity().getFaculties().remove(facultyToRemove);
+            facultyToRemove.setUniversity(null);
+        }
+
+        boolean isRemoved = faculties.remove(facultyToRemove);
 
         if (isRemoved) {
             System.out.println("Success: Faculty with ID " + id + " has been removed.");
         } else {
-            System.out.println("Error: No faculty found with ID " + id);
+            System.out.println("Error: Failed to remove faculty with ID " + id);
         }
     }
 

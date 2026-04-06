@@ -12,8 +12,11 @@ public class Department{
     String fullName;
     String head;
     int cabinet;
+    @lombok.ToString.Exclude
     Faculty faculty;
+    @lombok.ToString.Exclude
     ArrayList<Teacher> teachers;
+    @lombok.ToString.Exclude
     ArrayList<Student> students;
 
     public Department(String id, String fullName, String head, int cabinet) {
@@ -49,5 +52,21 @@ public class Department{
         if (students.remove(student)) {
             student.setDepartment(null);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "id='" + id + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", head='" + head + '\'' +
+                ", cabinet=" + cabinet +
+                ", faculty=" + (faculty != null ? faculty.getFullName() : "None") +
+                ", university=" + (getUniversity() != null ? getUniversity().getFullName() : "None") +
+                '}';
+    }
+
+    public University getUniversity() {
+        return faculty != null ? faculty.getUniversity() : null;
     }
 }
