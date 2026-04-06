@@ -59,7 +59,7 @@ public class Main {
             }
             System.out.println("0. Exit");
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 16);
+            int choice = CRUD.intInRange("Your choice: ", 0, 20);
 
             try {
                 switch (choice) {
@@ -68,19 +68,19 @@ public class Main {
                     case 3 -> { auth.requireAuth(); CRUD.searchByGroup(); }
                     case 4 -> { auth.requireAuth(); CRUD.searchByGrade(); }
                     case 5 -> { auth.requireAuth(); CRUD.showAllStudentsByCourse(); }
-                    case 6 -> { auth.requireAdmin(); CRUD.create(); }
-                    case 7 -> { auth.requireAdmin(); CRUD.update(); }
-                    case 8 -> { auth.requireAdmin(); CRUD.delete(); }
-                    case 9 -> { auth.requireAdmin(); CRUDForFaculty.create(); }
-                    case 10 -> { auth.requireAuth(); CRUDForFaculty.showFaculties(); }
-                    case 11 -> { auth.requireAdmin(); CRUDForFaculty.update(); }
-                    case 12 -> { auth.requireAdmin(); CRUDForFaculty.deleteFaculty(); }
-                    case 13 -> { auth.requireAdmin(); CRUDForDepartment.createDepartment(); }
-                    case 14 -> { auth.requireAuth(); CRUDForDepartment.showDepartmentsOfFaculty(); }
-                    case 15 -> { auth.requireAdmin(); CRUDForDepartment.updateDepartment(); }
-                    case 16 -> { auth.requireAdmin(); CRUDForDepartment.deleteDepartment(); }
-                    case 17 -> { auth.requireAdmin(); CRUDForTeacher.create(); }
-                    case 18 -> { auth.requireAuth(); CRUDForTeacher.showTeachers(); }
+                    case 6 -> { auth.requireAuth(); CRUDForFaculty.showFaculties(); }
+                    case 7 -> { auth.requireAuth(); CRUDForTeacher.showTeachers(); }
+                    case 8 -> { auth.requireAdmin(); CRUD.create(); }
+                    case 9 -> { auth.requireAdmin(); CRUD.update(); }
+                    case 10 -> { auth.requireAdmin(); CRUD.delete(); }
+                    case 11 -> { auth.requireAdmin(); CRUDForFaculty.create(); }
+                    case 12 -> { auth.requireAdmin(); CRUDForFaculty.update(); }
+                    case 13 -> { auth.requireAdmin(); CRUDForFaculty.deleteFaculty(); }
+                    case 14 -> { auth.requireAdmin(); CRUDForDepartment.createDepartment(); }
+                    case 15 -> { auth.requireAuth(); CRUDForDepartment.showDepartmentsOfFaculty(); }
+                    case 16 -> { auth.requireAdmin(); CRUDForDepartment.updateDepartment(); }
+                    case 17 -> { auth.requireAdmin(); CRUDForDepartment.deleteDepartment(); }
+                    case 18 -> { auth.requireAdmin(); CRUDForTeacher.create(); }
                     case 19 -> { auth.requireAdmin(); CRUDForTeacher.update(); }
                     case 20 -> { auth.requireAdmin(); CRUDForTeacher.delete(); }
                     case 0 -> { auth.logout(); running = false; }
