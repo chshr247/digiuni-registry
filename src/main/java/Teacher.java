@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 @Getter
 @Setter
+@ReflectiveEntity("Teacher")
 public final class Teacher extends Person {
     String post;
     String degree;

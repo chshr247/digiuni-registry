@@ -9,7 +9,8 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 @Getter
 @Setter
-public final class Student extends Person{
+@ReflectiveEntity("Student")
+public final class Student extends Person {
     int grade;
     int group;
     int year;

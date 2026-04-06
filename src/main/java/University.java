@@ -7,6 +7,7 @@ import java.util.ArrayList;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ReflectiveEntity("University")
 public class University {
     String fullName;
     String shortName;

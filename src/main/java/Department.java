@@ -7,7 +7,8 @@ import java.util.ArrayList;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Department{
+@ReflectiveEntity("Department")
+public class Department {
     String id;
     String fullName;
     String head;
