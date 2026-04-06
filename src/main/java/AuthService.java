@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AuthService {
-    private Map<String, AuthUser> users = new HashMap<>();
+    protected Map<String, AuthUser> users = new HashMap<>();
     private AuthUser currentUser = null;
 
     public AuthService() {
@@ -69,4 +69,19 @@ public class AuthService {
         }
     }
 
+    public Map<String, AuthUser> getUsers() {
+        return users;
+    }
+
+    public void addUser(AuthUser user) {
+        users.put(user.getUsername(), user);
+    }
+
+    public void removeUser(String username) {
+        users.remove(username);
+    }
+
+    public AuthUser getUser(String username) {
+        return users.get(username);
+    }
 }

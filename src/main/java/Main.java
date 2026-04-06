@@ -34,6 +34,7 @@ public class Main {
         while (running) {
             System.out.println("""
                    --- MAIN MENU ---
+                    0. Logout and exit
                     1. Search students
                     2. Show all entities
                    --- MANAGER ONLY ---
@@ -41,10 +42,10 @@ public class Main {
                     4. Update entity
                    --- ADMIN ONLY ---
                     5. Delete entity
-                    0. Logout and exit
+                    6. Manage users
                    """);
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 5);
+            int choice = CRUD.intInRange("Your choice: ", 0, 6);
 
             try {
                 switch (choice) {
@@ -53,6 +54,7 @@ public class Main {
                     case 3 -> { auth.requireManager(); showAddMenu(auth); }
                     case 4 -> { auth.requireManager(); showUpdateMenu(auth); }
                     case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
+                    case 6 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
                     case 0 -> { auth.logout(); running = false; }
                 }
                 Thread.sleep(2000);
@@ -147,6 +149,24 @@ public class Main {
             case 2 -> CRUDForFaculty.showFaculties();
             case 3 -> CRUDForDepartment.showDepartmentsOfFaculty();
             case 4 -> CRUDForTeacher.showTeachers();
+            case 0 -> {}
+        }
+    }
+
+    private static void showUserManagementMenu(AuthService auth) {
+        System.out.println("\n--- USER MANAGEMENT ---");
+        System.out.println("1. View all users");
+        System.out.println("2. Add user");
+        System.out.println("3. Update user");
+        System.out.println("4. Delete user");
+        System.out.println("0. Back");
+
+        int choice = CRUD.intInRange("Your choice: ", 0, 4);
+        switch (choice) {
+            case 1 -> CRUDForUser.showUsers(auth);
+            case 2 -> CRUDForUser.addUser(auth);
+            case 3 -> CRUDForUser.updateUser(auth);
+            case 4 -> CRUDForUser.deleteUser(auth);
             case 0 -> {}
         }
     }

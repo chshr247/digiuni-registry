@@ -1,5 +1,12 @@
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor(force = true)
+@AllArgsConstructor
 public class AuthUser {
-    private String username;
+    private final String username;
     private String password;
     private Role role;
     private Person person;
@@ -8,26 +15,6 @@ public class AuthUser {
         this.username = username;
         this.password = password;
         this.role = role;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
     }
 
     @Override

@@ -1,0 +1,105 @@
+import java.util.Scanner;
+
+public class CRUDForUser {
+    static Scanner scanner = new Scanner(System.in);
+
+    private static String readNonEmptyString(String message) {
+        String input;
+        do {
+            System.out.print(message);
+            input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                System.out.println("Error: field cannot be empty.");
+            }
+        } while (input.isEmpty());
+        return input;
+    }
+
+    static int intInRange(String message, int min, int max) {
+        int value;
+        while (true) {
+            try {
+                System.out.print(message);
+                value = Integer.parseInt(scanner.nextLine());
+                if (value < min || value > max) {
+                    System.out.println("Error: value must be between " + min + " and " + max);
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: enter a number.");
+            }
+        }
+    }
+
+    public static void showUsers(AuthService auth) {
+        System.out.println("All users:");
+        auth.getUsers().forEach((username, user) -> System.out.println(username + " - " + user.getRole()));
+    }
+
+    public static void addUser(AuthService auth) {
+        String username = readNonEmptyString("Enter username: ");
+        if (auth.getUser(username) != null) {
+            System.out.println("User already exists!");
+            return;
+        }
+        String password = readNonEmptyString("Enter password: ");
+        System.out.println("Choose role:");
+        System.out.println("1. USER");
+        System.out.println("2. MANAGER");
+        System.out.println("3. ADMIN");
+        int roleChoice = intInRange("Your choice: ", 1, 3);
+        Role role = switch (roleChoice) {
+            case 1 -> Role.USER;
+            case 2 -> Role.MANAGER;
+            case 3 -> Role.ADMIN;
+            default -> Role.USER;
+        };
+
+        AuthUser newUser = new AuthUser(username, password, role);
+        auth.addUser(newUser);
+        System.out.println("User added successfully!");
+    }
+
+    public static void updateUser(AuthService auth) {
+        String username = readNonEmptyString("Enter username to update: ");
+        AuthUser user = auth.getUser(username);
+        if (user == null) {
+            System.out.println("User not found!");
+            return;
+        }
+        System.out.println("Choose what to update:");
+        System.out.println("1. Password");
+        System.out.println("2. Role");
+        int choice = intInRange("Your choice: ", 1, 2);
+        if (choice == 1) {
+            String newPass = readNonEmptyString("Enter new password: ");
+            user.setPassword(newPass);
+            System.out.println("Password updated!");
+        } else {
+            System.out.println("Choose new role:");
+            System.out.println("1. USER");
+            System.out.println("2. MANAGER");
+            System.out.println("3. ADMIN");
+            int roleChoice = intInRange("Your choice: ", 1, 3);
+            Role newRole = switch (roleChoice) {
+                case 1 -> Role.USER;
+                case 2 -> Role.MANAGER;
+                case 3 -> Role.ADMIN;
+                default -> Role.USER;
+            };
+            user.setRole(newRole);
+            System.out.println("Role updated!");
+        }
+    }
+
+    public static void deleteUser(AuthService auth) {
+        String username = readNonEmptyString("Enter username to delete: ");
+        if (auth.getUser(username) == null) {
+            System.out.println("User not found!");
+            return;
+        }
+        auth.removeUser(username);
+        System.out.println("User deleted!");
+    }
+}
