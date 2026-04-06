@@ -50,6 +50,7 @@ public class Main {
                     0. Logout and exit
                     1. Search students
                     2. Show all entities
+                    7. Reports and statistics
                    --- MANAGER ONLY ---
                     3. Add entity
                     4. Update entity
@@ -68,6 +69,7 @@ public class Main {
                     case 4 -> { auth.requireManager(); showUpdateMenu(auth); }
                     case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
                     case 6 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
+                    case 7 -> { auth.requireAuth(); StreamReports.showReportsMenu(); }
                     case 0 -> { auth.logout(); running = false; }
                 }
                 Thread.sleep(2000);
