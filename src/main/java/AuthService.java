@@ -8,6 +8,7 @@ public class AuthService {
     public AuthService() {
         users.put("admin", new AuthUser("admin", "admin", Role.ADMIN));
         users.put("user", new AuthUser("user", "user", Role.USER));
+        users.put("manager", new AuthUser("manager", "manager", Role.MANAGER));
     }
 
     public boolean login(String username, String password) {
@@ -37,6 +38,10 @@ public class AuthService {
         return isLoggedIn() && currentUser.getRole() == Role.ADMIN;
     }
 
+    public boolean isManager() {
+        return isLoggedIn() && currentUser.getRole() == Role.MANAGER;
+    }
+
     public AuthUser getCurrentUser() {
         return currentUser;
     }
@@ -52,6 +57,14 @@ public class AuthService {
         requireAuth();
         if (!isAdmin()) {
             System.out.println("Access denied. This action requires ADMIN role.");
+            throw new RuntimeException("Not authorized");
+        }
+    }
+
+    public void requireManager() {
+        requireAuth();
+        if (!isManager() && !isAdmin()) {
+            System.out.println("Access denied. This action requires MANAGER or ADMIN role.");
             throw new RuntimeException("Not authorized");
         }
     }

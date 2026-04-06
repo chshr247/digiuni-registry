@@ -7,6 +7,7 @@ public class Main {
         System.out.println("""
                 admin admin
                 user user
+                manager manager
                 """);
         while (!auth.isLoggedIn()) {
             System.out.print("Username: ");
@@ -31,13 +32,17 @@ public class Main {
         CRUD.students.add(newStudent);
 
         while (running) {
-            System.out.println("\n--- MENU ---");
-            System.out.println("1. Search Students");
-            System.out.println("2. Show Entity");
-            System.out.println("3. Add Entity");
-            System.out.println("4. Update Entity");
-            System.out.println("5. Delete Entity");
-            System.out.println("0. Exit");
+            System.out.println("""
+                   --- MAIN MENU ---
+                    1. Search students
+                    2. Show all entities
+                   --- MANAGER ONLY ---
+                    3. Add entity
+                    4. Update entity
+                   --- ADMIN ONLY ---
+                    5. Delete entity
+                    0. Logout and exit
+                   """);
 
             int choice = CRUD.intInRange("Your choice: ", 0, 5);
 
@@ -45,8 +50,8 @@ public class Main {
                 switch (choice) {
                     case 1 -> { auth.requireAuth(); showSearchMenu(auth); }
                     case 2 -> { auth.requireAuth(); showShowMenu(auth); }
-                    case 3 -> { auth.requireAdmin(); showAddMenu(auth); }
-                    case 4 -> { auth.requireAdmin(); showUpdateMenu(auth); }
+                    case 3 -> { auth.requireManager(); showAddMenu(auth); }
+                    case 4 -> { auth.requireManager(); showUpdateMenu(auth); }
                     case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
                     case 0 -> { auth.logout(); running = false; }
                 }
