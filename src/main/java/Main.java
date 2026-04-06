@@ -2,7 +2,7 @@ import java.time.LocalDate;
 import java.time.Month;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         AuthService auth = new AuthService();
         System.out.println("""
                 admin admin
@@ -32,63 +32,117 @@ public class Main {
 
         while (running) {
             System.out.println("\n--- MENU ---");
-            System.out.println("1. List Students");
-            System.out.println("2. Search by name");
-            System.out.println("3. Search by group");
-            System.out.println("4. Search by grade");
-            System.out.println("5. List by grade");
-            System.out.println("6. Show Faculties");
-            System.out.println("7. Show Teachers");
-
-            if (auth.isAdmin()) {
-                System.out.println("--- ADMIN only ---");
-                System.out.println("8. Add Student");
-                System.out.println("9. Update Student");
-                System.out.println("10. Delete Student");
-                System.out.println("11. Create Faculty");
-                System.out.println("12. Update Faculty");
-                System.out.println("13. Delete Faculty");
-                System.out.println("14. Create Department for Faculty");
-                System.out.println("15. Show Departments of Faculty");
-                System.out.println("16. Update Department of Faculty");
-                System.out.println("17. Delete Department of Faculty");
-                System.out.println("18. Add Teacher");
-                System.out.println("19. Update Teacher");
-                System.out.println("20. Delete Teacher");
-
-            }
+            System.out.println("1. Search Students");
+            System.out.println("2. Show Entity");
+            System.out.println("3. Add Entity");
+            System.out.println("4. Update Entity");
+            System.out.println("5. Delete Entity");
             System.out.println("0. Exit");
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 20);
+            int choice = CRUD.intInRange("Your choice: ", 0, 5);
 
             try {
                 switch (choice) {
-                    case 1 -> { auth.requireAuth(); CRUD.showStudents(); }
-                    case 2 -> { auth.requireAuth(); CRUD.searchByFullName(); }
-                    case 3 -> { auth.requireAuth(); CRUD.searchByGroup(); }
-                    case 4 -> { auth.requireAuth(); CRUD.searchByGrade(); }
-                    case 5 -> { auth.requireAuth(); CRUD.showAllStudentsByCourse(); }
-                    case 6 -> { auth.requireAuth(); CRUDForFaculty.showFaculties(); }
-                    case 7 -> { auth.requireAuth(); CRUDForTeacher.showTeachers(); }
-                    case 8 -> { auth.requireAdmin(); CRUD.create(); }
-                    case 9 -> { auth.requireAdmin(); CRUD.update(); }
-                    case 10 -> { auth.requireAdmin(); CRUD.delete(); }
-                    case 11 -> { auth.requireAdmin(); CRUDForFaculty.create(); }
-                    case 12 -> { auth.requireAdmin(); CRUDForFaculty.update(); }
-                    case 13 -> { auth.requireAdmin(); CRUDForFaculty.deleteFaculty(); }
-                    case 14 -> { auth.requireAdmin(); CRUDForDepartment.createDepartment(); }
-                    case 15 -> { auth.requireAuth(); CRUDForDepartment.showDepartmentsOfFaculty(); }
-                    case 16 -> { auth.requireAdmin(); CRUDForDepartment.updateDepartment(); }
-                    case 17 -> { auth.requireAdmin(); CRUDForDepartment.deleteDepartment(); }
-                    case 18 -> { auth.requireAdmin(); CRUDForTeacher.create(); }
-                    case 19 -> { auth.requireAdmin(); CRUDForTeacher.update(); }
-                    case 20 -> { auth.requireAdmin(); CRUDForTeacher.delete(); }
+                    case 1 -> { auth.requireAuth(); showSearchMenu(auth); }
+                    case 2 -> { auth.requireAuth(); showShowMenu(auth); }
+                    case 3 -> { auth.requireAdmin(); showAddMenu(auth); }
+                    case 4 -> { auth.requireAdmin(); showUpdateMenu(auth); }
+                    case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
                     case 0 -> { auth.logout(); running = false; }
                 }
+                Thread.sleep(2000);
             } catch (RuntimeException e) {
             }
         }
 
         System.out.println("Program finished.");
+    }
+
+    private static void showSearchMenu(AuthService auth) {
+        System.out.println("\n--- SEARCH STUDENTS ---");
+        System.out.println("1. Search by name");
+        System.out.println("2. Search by group");
+        System.out.println("3. Search by grade");
+        System.out.println("0. Back");
+
+        int choice = CRUD.intInRange("Your choice: ", 0, 3);
+        switch (choice) {
+            case 1 -> CRUD.searchByFullName();
+            case 2 -> CRUD.searchByGroup();
+            case 3 -> CRUD.searchByGrade();
+            case 0 -> {}
+        }
+    }
+
+    private static void showAddMenu(AuthService auth) {
+        System.out.println("\n--- ADD ENTITY ---");
+        System.out.println("1. Add Student");
+        System.out.println("2. Add Faculty");
+        System.out.println("3. Add Department");
+        System.out.println("4. Add Teacher");
+        System.out.println("0. Back");
+
+        int choice = CRUD.intInRange("Your choice: ", 0, 4);
+        switch (choice) {
+            case 1 -> CRUD.create();
+            case 2 -> CRUDForFaculty.create();
+            case 3 -> CRUDForDepartment.createDepartment();
+            case 4 -> CRUDForTeacher.create();
+            case 0 -> {}
+        }
+    }
+
+    private static void showUpdateMenu(AuthService auth) {
+        System.out.println("\n--- UPDATE ENTITY ---");
+        System.out.println("1. Update Student");
+        System.out.println("2. Update Faculty");
+        System.out.println("3. Update Department");
+        System.out.println("4. Update Teacher");
+        System.out.println("0. Back");
+
+        int choice = CRUD.intInRange("Your choice: ", 0, 4);
+        switch (choice) {
+            case 1 -> CRUD.update();
+            case 2 -> CRUDForFaculty.update();
+            case 3 -> CRUDForDepartment.updateDepartment();
+            case 4 -> CRUDForTeacher.update();
+            case 0 -> {}
+        }
+    }
+
+    private static void showDeleteMenu(AuthService auth) {
+        System.out.println("\n--- DELETE ENTITY ---");
+        System.out.println("1. Delete Student");
+        System.out.println("2. Delete Faculty");
+        System.out.println("3. Delete Department");
+        System.out.println("4. Delete Teacher");
+        System.out.println("0. Back");
+
+        int choice = CRUD.intInRange("Your choice: ", 0, 4);
+        switch (choice) {
+            case 1 -> CRUD.delete();
+            case 2 -> CRUDForFaculty.deleteFaculty();
+            case 3 -> CRUDForDepartment.deleteDepartment();
+            case 4 -> CRUDForTeacher.delete();
+            case 0 -> {}
+        }
+    }
+
+    private static void showShowMenu(AuthService auth) {
+        System.out.println("\n--- SHOW ENTITY ---");
+        System.out.println("1. Show All Students");
+        System.out.println("2. Show All Faculties");
+        System.out.println("3. Show All Departments");
+        System.out.println("4. Show All Teachers");
+        System.out.println("0. Back");
+
+        int choice = CRUD.intInRange("Your choice: ", 0, 4);
+        switch (choice) {
+            case 1 -> CRUD.showStudents();
+            case 2 -> CRUDForFaculty.showFaculties();
+            case 3 -> CRUDForDepartment.showDepartmentsOfFaculty();
+            case 4 -> CRUDForTeacher.showTeachers();
+            case 0 -> {}
+        }
     }
 }
