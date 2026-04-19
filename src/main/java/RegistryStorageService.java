@@ -141,6 +141,7 @@ public class RegistryStorageService {
 
         loadStudents(departmentsById);
         loadTeachers(departmentsById);
+        resolveDeanAndHead();
         loadUsers();
         recalculateCounters();
     }
@@ -150,6 +151,7 @@ public class RegistryStorageService {
                 || Files.exists(DEPARTMENTS_FILE) || Files.exists(STUDENTS_FILE)
                 || Files.exists(TEACHERS_FILE);
     }
+
 
     private static void saveUniversity() throws IOException {
         List<String> lines = new ArrayList<>();
@@ -161,31 +163,34 @@ public class RegistryStorageService {
 
     private static void saveFaculties() throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add(header("id", "fullName", "shortName", "dean", "contact"));
-        for (Faculty f : CRUDForFaculty.faculties)
-            lines.add(row(f.getId(), f.getFullName(), f.getShortName(), f.getDean(), f.getContact()));
+        lines.add(header("id", "fullName", "shortName", "contact", "deanId"));
+        for (Faculty f : CRUDForFaculty.faculties) {
+            String deanId = f.getDean() == null ? "" : f.getDean().getId();
+            lines.add(row(f.getId(), f.getFullName(), f.getShortName(), f.getContact(), deanId));
+        }
         writeAll(FACULTIES_FILE, lines);
     }
 
     private static void saveDepartments() throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add(header("id", "fullName", "head", "cabinet", "facultyId"));
+        lines.add(header("id", "fullName", "cabinet", "facultyId", "headId"));
         for (Department d : allDepartments()) {
             String facultyId = d.getFaculty() == null ? "" : d.getFaculty().getId();
-            lines.add(row(d.getId(), d.getFullName(), d.getHead(), String.valueOf(d.getCabinet()), facultyId));
+            String headId    = d.getHead()    == null ? "" : d.getHead().getId();
+            lines.add(row(d.getId(), d.getFullName(), String.valueOf(d.getCabinet()), facultyId, headId));
         }
         writeAll(DEPARTMENTS_FILE, lines);
     }
 
     private static void saveStudents() throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add(header("id", "fullName", "birthDate", "email", "phone",
+        lines.add(header("id", "lastName", "firstName", "patronymic", "birthDate", "email", "phone",
                 "grade", "group", "year", "formOfStudy", "status", "departmentId"));
         for (Person p : CRUD.students) {
             if (!(p instanceof Student s)) continue;
             String deptId = s.getDepartment() == null ? "" : s.getDepartment().getId();
-            lines.add(row(s.getId(), s.getFullName(), formatDate(s.getBirthDate()),
-                    s.getEmail(), "\u0027" + s.getPhone(),
+            lines.add(row(s.getId(), s.getLastName(), s.getFirstName(), s.getPatronymic(),
+                    formatDate(s.getBirthDate()), s.getEmail(), "\u0027" + s.getPhone(),
                     String.valueOf(s.getGrade()), String.valueOf(s.getGroup()), String.valueOf(s.getYear()),
                     s.getFormOfStudy(), s.getStatus(), deptId));
         }
@@ -194,12 +199,12 @@ public class RegistryStorageService {
 
     private static void saveTeachers() throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add(header("id", "fullName", "birthDate", "email", "phone",
+        lines.add(header("id", "lastName", "firstName", "patronymic", "birthDate", "email", "phone",
                 "post", "degree", "academicRank", "startedJobDate", "rate", "departmentId"));
         for (Teacher t : CRUDForTeacher.teachers) {
             String deptId = t.getDepartment() == null ? "" : t.getDepartment().getId();
-            lines.add(row(t.getId(), t.getFullName(), formatDate(t.getBirthDate()),
-                    t.getEmail(), "\u0027" + t.getPhone(),
+            lines.add(row(t.getId(), t.getLastName(), t.getFirstName(), t.getPatronymic(),
+                    formatDate(t.getBirthDate()), t.getEmail(), "\u0027" + t.getPhone(),
                     t.getPost(), t.getDegree(), t.getAcademicRank(),
                     formatDate(t.getStartedJobDate()), String.valueOf(t.getRate()), deptId));
         }
@@ -227,7 +232,7 @@ public class RegistryStorageService {
         Map<String, Faculty> byId = new LinkedHashMap<>();
         for (String line : readDataLines(FACULTIES_FILE)) {
             String[] p = splitLine(line, 5);
-            Faculty f = new Faculty(p[0], p[1], p[2], p[3], p[4]);
+            Faculty f = new Faculty(p[0], p[1], p[2], p[3]);
             f.setDepartments(new ArrayList<>());
             f.setUniversity(university);
             CRUDForFaculty.faculties.add(f);
@@ -242,10 +247,10 @@ public class RegistryStorageService {
         Map<String, Department> byId = new LinkedHashMap<>();
         for (String line : readDataLines(DEPARTMENTS_FILE)) {
             String[] p = splitLine(line, 5);
-            Department d = new Department(p[0], p[1], p[2], parseInt(p[3]));
+            Department d = new Department(p[0], p[1], parseInt(p[2]));
             d.setTeachers(new ArrayList<>());
             d.setStudents(new ArrayList<>());
-            Faculty f = facultiesById.get(p[4]);
+            Faculty f = facultiesById.get(p[3]);
             d.setFaculty(f);
             if (f != null) {
                 if (f.getDepartments() == null) f.setDepartments(new ArrayList<>());
@@ -258,23 +263,46 @@ public class RegistryStorageService {
 
     private static void loadStudents(Map<String, Department> departmentsById) throws IOException {
         for (String line : readDataLines(STUDENTS_FILE)) {
-            String[] p = splitLine(line, 11);
-            Student s = new Student(p[0], p[1], parseDate(p[2]), p[3], stripPhone(p[4]),
-                    parseInt(p[5]), parseInt(p[6]), parseInt(p[7]), p[8], p[9]);
+            String[] p = splitLine(line, 13);
+            Student s = new Student(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
+                    parseInt(p[7]), parseInt(p[8]), parseInt(p[9]), p[10], p[11]);
             CRUD.students.add(s);
-            Department d = departmentsById.get(p[10]);
+            Department d = departmentsById.get(p[12]);
             if (d != null) d.addStudent(s);
         }
     }
 
     private static void loadTeachers(Map<String, Department> departmentsById) throws IOException {
         for (String line : readDataLines(TEACHERS_FILE)) {
-            String[] p = splitLine(line, 11);
-            Teacher t = new Teacher(p[0], p[1], parseDate(p[2]), p[3], stripPhone(p[4]),
-                    p[5], p[6], p[7], parseDate(p[8]), parseInt(p[9]));
+            String[] p = splitLine(line, 13);
+            Teacher t = new Teacher(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
+                    p[7], p[8], p[9], parseDate(p[10]), parseInt(p[11]));
             CRUDForTeacher.teachers.add(t);
-            Department d = departmentsById.get(p[10]);
+            Department d = departmentsById.get(p[12]);
             if (d != null) d.addTeacher(t);
+        }
+    }
+
+    private static void resolveDeanAndHead() throws IOException {
+        // Faculties — deanId у p[4]
+        List<String> fLines = readDataLines(FACULTIES_FILE);
+        for (String line : fLines) {
+            String[] p = splitLine(line, 5);
+            if (p[4].isEmpty()) continue;
+            Faculty f = CRUDForFaculty.faculties.stream()
+                    .filter(x -> x.getId().equals(p[0])).findFirst().orElse(null);
+            if (f == null) continue;
+            CRUDForTeacher.findTeacherByIdOptional(p[4]).ifPresent(f::setDean);
+        }
+        // Departments — headId у p[4]
+        List<String> dLines = readDataLines(DEPARTMENTS_FILE);
+        for (String line : dLines) {
+            String[] p = splitLine(line, 5);
+            if (p[4].isEmpty()) continue;
+            CRUDForFaculty.faculties.stream()
+                    .flatMap(f -> f.getDepartments().stream())
+                    .filter(d -> d.getId().equals(p[0])).findFirst()
+                    .ifPresent(d -> CRUDForTeacher.findTeacherByIdOptional(p[4]).ifPresent(d::setHead));
         }
     }
 
@@ -287,7 +315,6 @@ public class RegistryStorageService {
             authService.getUsers().put(p[0], new AuthUser(p[0], p[1], role));
         }
     }
-
 
     private static University extractUniversity() {
         for (Faculty f : CRUDForFaculty.faculties)

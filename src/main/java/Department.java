@@ -11,7 +11,8 @@ import java.util.ArrayList;
 public class Department {
     String id;
     String fullName;
-    String head;
+    @lombok.ToString.Exclude
+    Teacher head;           // посилання на завідувача кафедри
     int cabinet;
     @lombok.ToString.Exclude
     Faculty faculty;
@@ -20,13 +21,16 @@ public class Department {
     @lombok.ToString.Exclude
     ArrayList<Student> students;
 
-    public Department(String id, String fullName, String head, int cabinet) {
+    public Department(String id, String fullName, int cabinet) {
         this.id = id;
         this.fullName = fullName;
-        this.head = head;
         this.cabinet = cabinet;
         this.teachers = new ArrayList<>();
         this.students = new ArrayList<>();
+    }
+
+    public String getHeadName() {
+        return head != null ? head.getFullName() : "Not assigned";
     }
 
     public void addTeacher(Teacher teacher) {
@@ -58,13 +62,13 @@ public class Department {
     @Override
     public String toString() {
         return "Department{" +
-                "id='" + id + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", head='" + head + '\'' +
+                "id='" + id + "'" +
+                ", fullName='" + fullName + "'" +
+                ", head=" + getHeadName() +
                 ", cabinet=" + cabinet +
                 ", faculty=" + (faculty != null ? faculty.getFullName() : "None") +
                 ", university=" + (getUniversity() != null ? getUniversity().getFullName() : "None") +
-                '}';
+                "}";
     }
 
     public University getUniversity() {

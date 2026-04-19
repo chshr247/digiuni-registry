@@ -194,7 +194,7 @@ public class ReflectionModule {
         }
 
         if (value instanceof Person person) {
-            return person.fullName + " (id=" + person.id + ")";
+            return person.getFullName() + " (id=" + person.getId() + ")";
         }
 
         if (value instanceof Collection<?> collection) {

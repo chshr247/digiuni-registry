@@ -11,9 +11,7 @@ public class CRUDForFaculty {
         do {
             System.out.print(message);
             input = scanner.nextLine().trim();
-            if (input.isEmpty()) {
-                System.out.println("Error: field cannot be empty.");
-            }
+            if (input.isEmpty()) System.out.println("Error: field cannot be empty.");
         } while (input.isEmpty());
         return input;
     }
@@ -24,11 +22,9 @@ public class CRUDForFaculty {
             try {
                 System.out.print(message);
                 value = Integer.parseInt(scanner.nextLine());
-                if (value < min || value > max) {
+                if (value < min || value > max)
                     System.out.println("Error: value must be between " + min + " and " + max);
-                } else {
-                    return value;
-                }
+                else return value;
             } catch (NumberFormatException e) {
                 System.out.println("Error: enter a number.");
             }
@@ -36,106 +32,86 @@ public class CRUDForFaculty {
     }
 
     public static Faculty findFacultyById(String id) {
-        for (Faculty faculty : faculties) {
-            if (faculty.getId().equals(id)) {
-                return faculty;
-            }
-        }
+        for (Faculty f : faculties)
+            if (f.getId().equals(id)) return f;
         return null;
     }
 
     public static void create() {
         counterOfFaculty++;
-        String id = String.valueOf(counterOfFaculty);
-        String fullName = readNonEmptyString("Enter name for faculty: ");
-        String shortName = readNonEmptyString("Enter short name for faculty: ");
-        String dean = readNonEmptyString("Enter dean for faculty: ");
-        String contact = readNonEmptyString("Enter contact for faculty: ");
-        Faculty newFaculty = new Faculty(id, fullName, shortName, dean, contact);
-        faculties.add(newFaculty);
+        String id        = String.valueOf(counterOfFaculty);
+        String fullName  = readNonEmptyString("Enter faculty name: ");
+        String shortName = readNonEmptyString("Enter short name: ");
+        String contact   = readNonEmptyString("Enter contact: ");
+
+        Faculty f = new Faculty(id, fullName, shortName, contact);
+
+        // Призначення декана (необов'язково)
+        System.out.println("Assign dean? Enter teacher ID or press Enter to skip: ");
+        String deanId = scanner.nextLine().trim();
+        if (!deanId.isEmpty()) {
+            CRUDForTeacher.findTeacherByIdOptional(deanId).ifPresentOrElse(
+                    t -> { f.setDean(t); System.out.println("Dean set: " + t.getFullName()); },
+                    () -> System.out.println("Teacher not found, dean not assigned.")
+            );
+        }
+
+        faculties.add(f);
         System.out.println("Faculty registered successfully!");
         RegistryStorageService.saveFacultiesSilently();
     }
 
     public static void showFaculties() {
-        if (faculties.isEmpty()) {
-            System.out.println("No faculties found.");
-        } else {
-            faculties.forEach(System.out::println);
-        }
+        if (faculties.isEmpty()) System.out.println("No faculties found.");
+        else faculties.forEach(System.out::println);
     }
 
     public static void deleteFaculty() {
         String id = readNonEmptyString("Enter faculty ID to remove: ");
-        Faculty facultyToRemove = findFacultyById(id);
+        Faculty toRemove = findFacultyById(id);
+        if (toRemove == null) { System.out.println("Error: No faculty found with ID " + id); return; }
 
-        if (facultyToRemove == null) {
-            System.out.println("Error: No faculty found with ID " + id);
-            return;
+        for (Department d : toRemove.getDepartments()) {
+            d.setFaculty(null);
+            for (Student s : d.getStudents()) s.setDepartment(null);
+            for (Teacher t : d.getTeachers()) t.setDepartment(null);
         }
-
-        // Remove references from departments
-        for (Department department : facultyToRemove.getDepartments()) {
-            department.setFaculty(null);
-            for (Student student : department.getStudents()) {
-                student.setDepartment(null);
-            }
-            for (Teacher teacher : department.getTeachers()) {
-                teacher.setDepartment(null);
-            }
+        if (toRemove.getUniversity() != null) {
+            toRemove.getUniversity().getFaculties().remove(toRemove);
+            toRemove.setUniversity(null);
         }
-
-        // Remove from university if exists
-        if (facultyToRemove.getUniversity() != null) {
-            facultyToRemove.getUniversity().getFaculties().remove(facultyToRemove);
-            facultyToRemove.setUniversity(null);
-        }
-
-        boolean isRemoved = faculties.remove(facultyToRemove);
-
-        if (isRemoved) {
-            System.out.println("Success: Faculty with ID " + id + " has been removed.");
-            RegistryStorageService.saveFacultiesSilently();
-        } else {
-            System.out.println("Error: Failed to remove faculty with ID " + id);
-        }
+        faculties.remove(toRemove);
+        System.out.println("Success: Faculty with ID " + id + " has been removed.");
+        RegistryStorageService.saveFacultiesSilently();
     }
 
     public static void update() {
         String id = readNonEmptyString("Enter faculty ID for updating: ");
-        Faculty targetFaculty = findFacultyById(id);
+        Faculty target = findFacultyById(id);
+        if (target == null) { System.out.println("No faculty found with ID: " + id); return; }
 
-        if (targetFaculty == null) {
-            System.out.println("No faculty found for this ID: " + id);
-            return;
-        }
-
-        System.out.println("Faculty found: " + targetFaculty.getFullName());
+        System.out.println("Faculty: " + target.getFullName());
         System.out.println("""
-                Enter number of what you want to update:
-                1 - ID
-                2 - Name
-                3 - Short Name
-                4 - Dean
-                5 - Contact
-                0 - Exit
-                """);
+            1 - Full Name    2 - Short Name    3 - Contact
+            4 - Assign Dean
+            0 - Exit""");
 
-        int choice = intInRange("Your choice: ", 0, 5);
-
+        int choice = intInRange("Your choice: ", 0, 4);
         switch (choice) {
-            case 1 -> targetFaculty.setId(readNonEmptyString("Enter new ID: "));
-            case 2 -> targetFaculty.setFullName(readNonEmptyString("Enter new full name: "));
-            case 3 -> targetFaculty.setShortName(readNonEmptyString("Enter new short name: "));
-            case 4 -> targetFaculty.setDean(readNonEmptyString("Enter new dean: "));
-            case 5 -> targetFaculty.setContact(readNonEmptyString("Enter new contact: "));
-            case 0 -> {
-                System.out.println("Exiting update menu.");
-                return;
+            case 1 -> target.setFullName(readNonEmptyString("New full name: "));
+            case 2 -> target.setShortName(readNonEmptyString("New short name: "));
+            case 3 -> target.setContact(readNonEmptyString("New contact: "));
+            case 4 -> {
+                System.out.print("Enter teacher ID for dean: ");
+                String deanId = scanner.nextLine().trim();
+                CRUDForTeacher.findTeacherByIdOptional(deanId).ifPresentOrElse(
+                        t -> { target.setDean(t); System.out.println("Dean set: " + t.getFullName()); },
+                        () -> System.out.println("Teacher not found.")
+                );
             }
-            default -> System.out.println("Invalid option.");
+            case 0 -> { System.out.println("Cancelled."); return; }
         }
-        System.out.println("Faculty information updated successfully!");
+        System.out.println("Faculty updated successfully!");
         RegistryStorageService.saveFacultiesSilently();
     }
 }

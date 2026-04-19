@@ -8,16 +8,13 @@ public class CRUD {
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Person> students = new ArrayList<>();
     public static int counterOfStudents = 0;
-    // CRUD: Create Read Update Delete
-    // Create
+
     private static String readNonEmptyString(String message) {
         String input;
         do {
             System.out.print(message);
             input = scanner.nextLine().trim();
-            if (input.isEmpty()) {
-                System.out.println("Error: field cannot be empty.");
-            }
+            if (input.isEmpty()) System.out.println("Error: field cannot be empty.");
         } while (input.isEmpty());
         return input;
     }
@@ -28,11 +25,9 @@ public class CRUD {
             try {
                 System.out.print(message);
                 value = Integer.parseInt(scanner.nextLine());
-                if (value < min || value > max) {
+                if (value < min || value > max)
                     System.out.println("Error: value must be between " + min + " and " + max);
-                } else {
-                    return value;
-                }
+                else return value;
             } catch (NumberFormatException e) {
                 System.out.println("Error: enter a number.");
             }
@@ -55,19 +50,11 @@ public class CRUD {
     private static Department chooseDepartment() {
         String facultyId = readNonEmptyString("Enter faculty ID: ");
         Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
-
-        if (faculty == null) {
-            System.out.println("No faculty found for this ID.");
-            return null;
-        }
+        if (faculty == null) { System.out.println("No faculty found for this ID."); return null; }
 
         String departmentId = readNonEmptyString("Enter department ID: ");
         Department department = CRUDForDepartment.findDepartmentById(faculty.getDepartments(), departmentId);
-
-        if (department == null) {
-            System.out.println("No department found for this ID.");
-            return null;
-        }
+        if (department == null) { System.out.println("No department found for this ID."); return null; }
 
         return department;
     }
@@ -75,220 +62,148 @@ public class CRUD {
     public static void create() {
         Department department = chooseDepartment();
         if (department == null) return;
+
         counterOfStudents++;
         String id = String.valueOf(counterOfStudents);
-        String fullName = readNonEmptyString("Enter Full Name: ");
-        LocalDate birthDate = readDate("Enter Birth Date: ");
+        String lastName   = readNonEmptyString("Enter Last Name: ");
+        String firstName  = readNonEmptyString("Enter First Name: ");
+        String patronymic = readNonEmptyString("Enter Patronymic: ");
+        LocalDate birthDate = readDate("Enter Birth Date");
         String email = readNonEmptyString("Enter Email: ");
         String phone = readNonEmptyString("Enter Phone Number: ");
         int grade = intInRange("Enter Grade (1-6): ", 1, 6);
         int group = intInRange("Enter Group (1-3): ", 1, 3);
-        int year = intInRange("Enter Year of Entering university: ", 1, 2026);
-        System.out.println("Enter choice of study:");
-        System.out.println("1 - Budget");
-        System.out.println("2 - Contract");
-        String form;
-        int choice = intInRange("Your choice: ", 1, 2);
-        if (choice == 1) {
-            form = "Budget";
-        } else {
-            form = "Contract";
-        }
-        System.out.println("Enter status of studying:");
-        System.out.println("1 - Studying");
-        System.out.println("2 - Academic leave");
-        System.out.println("3 - Deducted");
-        String status;
-        int choice2 = intInRange("Your choice: ", 1, 3);
-        if (choice2 == 1) {
-            status = "Studying";
-        } else if (choice2 == 2) {
-            status = "Academic leave";
-        } else {
-            status = "Deducted";
-        }
+        int year  = intInRange("Enter Year of Entering: ", 2000, 2100);
 
-        Person newStudent = new Student(id, fullName, birthDate, email, phone, grade, group, year, form, status);
+        System.out.println("Form of study: 1 - Budget  2 - Contract");
+        String form = intInRange("Your choice: ", 1, 2) == 1 ? "Budget" : "Contract";
 
-        students.add(newStudent);
-        ((Student) newStudent).setDepartment(department);
-        department.addStudent((Student) newStudent);
+        System.out.println("Status: 1 - Studying  2 - Academic leave  3 - Deducted");
+        String status = switch (intInRange("Your choice: ", 1, 3)) {
+            case 1 -> "Studying";
+            case 2 -> "Academic leave";
+            default -> "Deducted";
+        };
+
+        Student s = new Student(id, lastName, firstName, patronymic, birthDate, email, phone,
+                grade, group, year, form, status);
+        students.add(s);
+        s.setDepartment(department);
+        department.addStudent(s);
         System.out.println("Student registered successfully!");
         RegistryStorageService.saveStudentsSilently();
     }
 
-
-    // Read
     public static void showStudents() {
-        if (students.isEmpty()) {
-            System.out.println("No students found.");
-        } else {
-            students.forEach(System.out::println);
-        }
+        if (students.isEmpty()) System.out.println("No students found.");
+        else students.forEach(System.out::println);
     }
 
     public static void searchByFullName() {
-        String founder = readNonEmptyString("Enter full name (or part of it): ");
-        boolean found =  false;
+        String query = readNonEmptyString("Enter name (or part of it): ").toLowerCase();
+        boolean found = false;
         for (Person p : students) {
-            if (p instanceof Student s && s.getFullName().contains(founder)) {
-                System.out.println(s);
-                found = true;
+            if (p instanceof Student s && s.getFullName().toLowerCase().contains(query)) {
+                System.out.println(s); found = true;
             }
         }
-        if(!found){
-            System.out.println("No students found");
-        }
+        if (!found) System.out.println("No students found");
     }
 
     public static void searchByGroup() {
         int group = intInRange("Enter group (1-3): ", 1, 3);
         boolean found = false;
-
         for (Person p : students) {
-            if (p instanceof Student s && s.getGroup() == group) {
-                System.out.println(s);
-                found = true;
-            }
+            if (p instanceof Student s && s.getGroup() == group) { System.out.println(s); found = true; }
         }
-        if (!found) {
-            System.out.println("No students found");
-        }
+        if (!found) System.out.println("No students found");
     }
+
     public static void searchByGrade() {
         int grade = intInRange("Enter grade (1-6): ", 1, 6);
         boolean found = false;
-
         for (Person p : students) {
-            if (p instanceof Student s && s.getGrade() == grade) {
-                System.out.println(s);
-                found = true;
-            }
+            if (p instanceof Student s && s.getGrade() == grade) { System.out.println(s); found = true; }
         }
-
-        if (!found) {
-            System.out.println("No students found");
-        }
+        if (!found) System.out.println("No students found");
     }
-    public static void showAllStudentsByCourse() {
-        if (students.isEmpty()) {
-            System.out.println("No students found.");
-            return;
-        }
 
+    public static void showAllStudentsByCourse() {
+        if (students.isEmpty()) { System.out.println("No students found."); return; }
         for (int grade = 1; grade <= 6; grade++) {
-            System.out.println("*==* Grade " + grade + "*==*");
+            System.out.println("*==* Grade " + grade + " *==*");
             boolean found = false;
             for (Person p : students) {
-                if (p instanceof Student s && s.getGrade() == grade) {
-                    System.out.println(s);
-                    found = true;
-                }
+                if (p instanceof Student s && s.getGrade() == grade) { System.out.println(s); found = true; }
             }
-            if (!found) {
-                System.out.println("There are no students in this grade");
-            }
-
+            if (!found) System.out.println("  No students in this grade");
         }
     }
 
-
-
-    // Update
     public static void update() {
-
-        String id = readNonEmptyString("Enter student's ID for updating: ");
-
-        Student targetStudent = null;
-
+        String id = readNonEmptyString("Enter student ID for updating: ");
+        Student target = null;
         for (Person p : students) {
-            if (p.getId().equals(id) && p instanceof Student) {
-                targetStudent = (Student) p;
-                break;
-            }
+            if (p.getId().equals(id) && p instanceof Student s) { target = s; break; }
         }
+        if (target == null) { System.out.println("No student found with ID: " + id); return; }
 
-        if (targetStudent == null) {
-            System.out.println("No student found for this ID: " + id);
-            return;
-        }
-
-        System.out.println("Student found: " + targetStudent.getFullName());
-
+        System.out.println("Student found: " + target.getFullName());
         System.out.println("""
-    Enter number of what you want to update:
-    1 - ID
-    2 - Name
-    3 - Birthdate
-    4 - Email
-    5 - Phone Number
-    6 - Grade
-    7 - Group
-    8 - Year
-    9 - Form of Study
-    10 - Status
-    0 - Exit
-    """);
+            1 - Last Name     2 - First Name    3 - Patronymic
+            4 - Birth Date    5 - Email         6 - Phone
+            7 - Grade         8 - Group         9 - Year
+            10 - Form         11 - Status       12 - Transfer department
+            0 - Exit""");
 
-        int choice = intInRange("Your choice: ", 0, 10);
-
+        int choice = intInRange("Your choice: ", 0, 12);
         switch (choice) {
-            case 1 -> targetStudent.setId(readNonEmptyString("Enter new ID: "));
-            case 2 -> targetStudent.setFullName(readNonEmptyString("Enter new Full Name: "));
-            case 3 -> targetStudent.setBirthDate(readDate("Enter new Birthdate: "));
-            case 4 -> targetStudent.setEmail(readNonEmptyString("Enter new Email: "));
-            case 5 -> targetStudent.setPhone(readNonEmptyString("Enter new Phone Number: "));
-            case 6 -> targetStudent.setGrade(intInRange("Enter new Grade (1-6): ", 1, 6));
-            case 7 -> targetStudent.setGroup(intInRange("Enter new Group (1-3): ", 1, 3));
-            case 8 -> targetStudent.setYear(intInRange("Enter new Year: ", 2000, 2100));
-            case 9 -> {
-                System.out.println("1 - Budget");
-                System.out.println("2 - Contract");
-                int f = intInRange("Your choice: ", 1, 2);
-                targetStudent.setFormOfStudy(f == 1 ? "Budget" : "Contract");
-            }
+            case 1  -> target.setLastName(readNonEmptyString("New Last Name: "));
+            case 2  -> target.setFirstName(readNonEmptyString("New First Name: "));
+            case 3  -> target.setPatronymic(readNonEmptyString("New Patronymic: "));
+            case 4  -> target.setBirthDate(readDate("New Birth Date"));
+            case 5  -> target.setEmail(readNonEmptyString("New Email: "));
+            case 6  -> target.setPhone(readNonEmptyString("New Phone: "));
+            case 7  -> target.setGrade(intInRange("New Grade (1-6): ", 1, 6));
+            case 8  -> target.setGroup(intInRange("New Group (1-3): ", 1, 3));
+            case 9  -> target.setYear(intInRange("New Year: ", 2000, 2100));
             case 10 -> {
-                System.out.println("1 - Studying");
-                System.out.println("2 - Academic leave");
-                System.out.println("3 - Deducted");
-                int s = intInRange("Your choice: ", 1, 3);
-
-                if (s == 1) targetStudent.setStatus("Studying");
-                else if (s == 2) targetStudent.setStatus("Academic leave");
-                else targetStudent.setStatus("Deducted");
+                System.out.println("1 - Budget  2 - Contract");
+                target.setFormOfStudy(intInRange("Your choice: ", 1, 2) == 1 ? "Budget" : "Contract");
             }
-            case 0 -> {
-                System.out.println("Exiting update menu.");
-                return;
+            case 11 -> {
+                System.out.println("1 - Studying  2 - Academic leave  3 - Deducted");
+                target.setStatus(switch (intInRange("Your choice: ", 1, 3)) {
+                    case 1 -> "Studying"; case 2 -> "Academic leave"; default -> "Deducted";
+                });
             }
-            default -> System.out.println("Invalid option.");
+            case 12 -> {
+                Department newDept = chooseDepartment();
+                if (newDept != null) {
+                    if (target.getDepartment() != null) target.getDepartment().removeStudent(target);
+                    newDept.addStudent(target);
+                    System.out.println("Student transferred to: " + newDept.getFullName());
+                }
+            }
+            case 0  -> { System.out.println("Cancelled."); return; }
         }
-
-        System.out.println("Student information updated successfully!");
+        System.out.println("Student updated successfully!");
         RegistryStorageService.saveStudentsSilently();
     }
 
-
     public static void delete() {
-        System.out.println("Enter student ID to remove: ");
-        String id = scanner.nextLine();
-        Student studentToRemove = null;
+        String id = readNonEmptyString("Enter student ID to remove: ");
+        Student toRemove = null;
         for (Person p : students) {
-            if (p.getId().equals(id) && p instanceof Student) {
-                studentToRemove = (Student) p;
-                break;
-            }
+            if (p.getId().equals(id) && p instanceof Student s) { toRemove = s; break; }
         }
-        if (studentToRemove != null) {
-            students.remove(studentToRemove);
-            if (studentToRemove.getDepartment() != null) {
-                studentToRemove.getDepartment().removeStudent(studentToRemove);
-            }
+        if (toRemove != null) {
+            students.remove(toRemove);
+            if (toRemove.getDepartment() != null) toRemove.getDepartment().removeStudent(toRemove);
             System.out.println("Success: Student with ID " + id + " has been removed.");
             RegistryStorageService.saveStudentsSilently();
         } else {
             System.out.println("Error: No student found with ID " + id);
         }
     }
-
 }

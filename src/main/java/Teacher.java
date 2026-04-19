@@ -4,6 +4,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -19,8 +20,11 @@ public final class Teacher extends Person {
     @ToString.Exclude
     Department department;
 
-    public Teacher(String id, String fullName, LocalDate birthDate, String email, String phone, String post, String degree, String academicRank, LocalDate startedJobDate, int rate) {
-        super(id, fullName, birthDate, email, phone);
+    public Teacher(String id, String lastName, String firstName, String patronymic,
+                   LocalDate birthDate, String email, String phone,
+                   String post, String degree, String academicRank,
+                   LocalDate startedJobDate, int rate) {
+        super(id, lastName, firstName, patronymic, birthDate, email, phone);
         this.post = post;
         this.degree = degree;
         this.academicRank = academicRank;
@@ -28,11 +32,24 @@ public final class Teacher extends Person {
         this.rate = rate;
     }
 
+    /** Стаж роботи в роках */
+    public int getExperience() {
+        return Period.between(startedJobDate, LocalDate.now()).getYears();
+    }
+
     @Override
     public String toString() {
-        return super.toString() + ", Department: " + (department != null ? department.getFullName() : "None") +
-               ", Faculty: " + (department != null && department.getFaculty() != null ? department.getFaculty().getFullName() : "None") +
-               ", University: " + (getUniversity() != null ? getUniversity().getFullName() : "None");
+        return "Teacher{" +
+                "id='" + getId() + "'" +
+                ", name='" + getFullName() + "'" +
+                ", post='" + post + "'" +
+                ", degree='" + degree + "'" +
+                ", rank='" + academicRank + "'" +
+                ", experience=" + getExperience() + "y" +
+                ", rate=" + rate +
+                ", department=" + (department != null ? department.getFullName() : "None") +
+                ", faculty=" + (getFaculty() != null ? getFaculty().getFullName() : "None") +
+                "}";
     }
 
     @ToString.Include

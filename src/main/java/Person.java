@@ -10,19 +10,28 @@ import java.time.Period;
 @AllArgsConstructor
 public sealed class Person permits Student, Teacher {
     String id;
-    String fullName;
+    String lastName;
+    String firstName;
+    String patronymic;
     LocalDate birthDate;
     String email;
     String phone;
     @ReflectIgnore
     AuthUser authUser;
-    
-    public Person(String id, String fullName, LocalDate birthDate, String email, String phone) {
+
+    public Person(String id, String lastName, String firstName, String patronymic,
+                  LocalDate birthDate, String email, String phone) {
         this.id = id;
-        this.fullName = fullName;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.patronymic = patronymic;
         this.birthDate = birthDate;
         this.email = email;
         this.phone = phone;
+    }
+
+    public String getFullName() {
+        return lastName + " " + firstName + " " + patronymic;
     }
 
     public int getAge() {
