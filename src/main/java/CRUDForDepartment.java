@@ -62,6 +62,7 @@ public class CRUDForDepartment {
         faculty.getDepartments().add(newDepartment);
         newDepartment.setFaculty(faculty);
         System.out.println("Department added successfully to faculty " + faculty.getFullName());
+        RegistryStorageService.saveDepartmentsSilently();
     }
 
     public static void showDepartmentsOfFaculty() {
@@ -123,6 +124,7 @@ public class CRUDForDepartment {
             default -> System.out.println("Invalid option.");
         }
         System.out.println("Department information updated successfully!");
+        RegistryStorageService.saveDepartmentsSilently();
     }
 
     public static void deleteDepartment() {
@@ -153,6 +155,7 @@ public class CRUDForDepartment {
 
         if (isRemoved) {
             System.out.println("Success: Department with ID " + departmentId + " has been removed.");
+            RegistryStorageService.saveDepartmentsSilently();
         } else {
             System.out.println("Error: No department found with ID " + departmentId);
         }

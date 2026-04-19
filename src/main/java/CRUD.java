@@ -114,6 +114,7 @@ public class CRUD {
         ((Student) newStudent).setDepartment(department);
         department.addStudent((Student) newStudent);
         System.out.println("Student registered successfully!");
+        RegistryStorageService.saveStudentsSilently();
     }
 
 
@@ -264,6 +265,7 @@ public class CRUD {
         }
 
         System.out.println("Student information updated successfully!");
+        RegistryStorageService.saveStudentsSilently();
     }
 
 
@@ -283,6 +285,7 @@ public class CRUD {
                 studentToRemove.getDepartment().removeStudent(studentToRemove);
             }
             System.out.println("Success: Student with ID " + id + " has been removed.");
+            RegistryStorageService.saveStudentsSilently();
         } else {
             System.out.println("Error: No student found with ID " + id);
         }

@@ -97,6 +97,7 @@ public class CRUDForTeacher {
         newTeacher.setDepartment(department);
         department.addTeacher(newTeacher);
         System.out.println("Teacher registered successfully!");
+        RegistryStorageService.saveTeachersSilently();
     }
 
     public static void showTeachers() {
@@ -163,6 +164,7 @@ public class CRUDForTeacher {
         }
 
         System.out.println("Teacher information updated successfully!");
+        RegistryStorageService.saveTeachersSilently();
     }
 
     public static void delete() {
@@ -180,6 +182,7 @@ public class CRUDForTeacher {
                 teacherToRemove.getDepartment().removeTeacher(teacherToRemove);
             }
             System.out.println("Success: Teacher with ID " + id + " has been removed.");
+            RegistryStorageService.saveTeachersSilently();
         } else {
             System.out.println("Error: No teacher found with ID " + id);
         }

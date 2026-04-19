@@ -1,9 +1,8 @@
-import java.time.LocalDate;
-import java.time.Month;
-
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         AuthService auth = new AuthService();
+        RegistryStorageService.setAuthService(auth);
+        RegistryStorageService.loadOnStartup();
         System.out.println("""
                 admin admin
                 user user
@@ -19,30 +18,6 @@ public class Main {
 
         boolean running = true;
 
-        // Test data
-        University testUniversity = new University("Test University", "TU", "City", "Address");
-        Faculty testFaculty = new Faculty("1", "Faculty of Computer Science", "FCS", "Dean Name", "contact@fcs.ua");
-        testFaculty.setUniversity(testUniversity);
-        testUniversity.addFaculty(testFaculty);
-        CRUDForFaculty.faculties.add(testFaculty);
-
-        Department testDepartment = new Department("1", "Department of Programming", "Head Name", 305);
-        testFaculty.getDepartments().add(testDepartment);
-        testDepartment.setFaculty(testFaculty);
-
-        Person newStudent = new Student("1",
-                "Viacheslav Mokliak Serhiyovych",
-                LocalDate.of(2007, Month.JANUARY, 28),
-                "slava.mokliak@gmail.com",
-                "+380509831589",
-                1,
-                2,
-                2025,
-                "Budget",
-                "Studying");
-        CRUD.students.add(newStudent);
-        ((Student) newStudent).setDepartment(testDepartment);
-        testDepartment.addStudent((Student) newStudent);
 
         while (running) {
             System.out.println("""
@@ -60,7 +35,7 @@ public class Main {
                     6. Manage users
                    """);
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 6);
+            int choice = CRUD.intInRange("Your choice: ", 0, 8);
 
             try {
                 switch (choice) {

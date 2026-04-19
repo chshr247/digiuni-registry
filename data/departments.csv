@@ -1,0 +1,12 @@
+﻿"id";"fullName";"head";"cabinet";"facultyId"
+1;"Department of Computer Science";"Dr. John Doe";"101";1
+2;"Department of Mathematics";"Dr. Jane Smith";"102";1
+3;"Department of Physics";"Dr. Albert Einstein";"103";1
+4;"Department of Chemistry";"Dr. Marie Curie";"104";1
+5;"Department of Biology";"Dr. Charles Darwin";"105";1
+6;"Department of Economics";"Dr. Adam Smith";"201";2
+7;"Department of Finance";"Dr. John Maynard Keynes";"202";2
+8;"Department of Marketing";"Dr. Philip Kotler";"203";2
+9;"Department of Management";"Dr. Peter Drucker";"204";2
+10;"Department of Law";"Dr. Ruth Bader Ginsburg";"301";4
+11;"Department of International Law";"Dr. Antonio Cassese";"302";4

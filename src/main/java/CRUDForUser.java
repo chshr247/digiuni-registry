@@ -59,6 +59,7 @@ public class CRUDForUser {
         AuthUser newUser = new AuthUser(username, password, role);
         auth.addUser(newUser);
         System.out.println("User added successfully!");
+        RegistryStorageService.saveUsersSilently();
     }
 
     public static void updateUser(AuthService auth) {
@@ -76,6 +77,7 @@ public class CRUDForUser {
             String newPass = readNonEmptyString("Enter new password: ");
             user.setPassword(newPass);
             System.out.println("Password updated!");
+            RegistryStorageService.saveUsersSilently();
         } else {
             System.out.println("Choose new role:");
             System.out.println("1. USER");
@@ -90,6 +92,7 @@ public class CRUDForUser {
             };
             user.setRole(newRole);
             System.out.println("Role updated!");
+            RegistryStorageService.saveUsersSilently();
         }
     }
 
@@ -101,5 +104,6 @@ public class CRUDForUser {
         }
         auth.removeUser(username);
         System.out.println("User deleted!");
+        RegistryStorageService.saveUsersSilently();
     }
 }

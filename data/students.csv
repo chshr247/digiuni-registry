@@ -1,0 +1,7 @@
+﻿"id";"fullName";"birthDate";"email";"phone";"grade";"group";"year";"formOfStudy";"status";"departmentId"
+"1";"Slava";"2007-01-28";"v.mokliak@ukma.edu.ua";"'+380509831589";"1";"1";"2025";"Budget";"Studying";"1"
+"2";"Peter Ivanenko";"2005-05-14";"p.ivanenko@ukma.edu.ua";"'+380501234567";"3";"2";"2023";"Contract";"Studying";"3"
+"3";"Maria Kovalenko";"2006-11-20";"m.kovalenko@ukma.edu.ua";"'+380671234567";"2";"1";"2024";"Budget";"Studying";"4"
+"4";"Alex Shevchenko";"2007-02-10";"a.shevchenko@ukma.edu.ua";"'+380631234567";"1";"4";"2025";"Contract";"Studying";"1"
+"5";"Daria Boyko";"2004-09-05";"d.boyko@ukma.edu.ua";"'+380991234567";"4";"1";"2022";"Budget";"Studying";"2"
+"6";"Max Melnyk";"2005-12-30";"m.melnyk@ukma.edu.ua";"'+380961234567";"3";"3";"2023";"Budget";"Studying";"6"

@@ -10,31 +10,36 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 public class RegistryStorageService {
 
     private static final Path DATA_DIR = Path.of("data");
-    private static final Path UNIVERSITY_FILE = DATA_DIR.resolve("university.tsv");
-    private static final Path FACULTIES_FILE = DATA_DIR.resolve("faculties.tsv");
-    private static final Path DEPARTMENTS_FILE = DATA_DIR.resolve("departments.tsv");
-    private static final Path STUDENTS_FILE = DATA_DIR.resolve("students.tsv");
-    private static final Path TEACHERS_FILE = DATA_DIR.resolve("teachers.tsv");
+    private static final Path UNIVERSITY_FILE = DATA_DIR.resolve("university.csv");
+    private static final Path FACULTIES_FILE  = DATA_DIR.resolve("faculties.csv");
+    private static final Path DEPARTMENTS_FILE = DATA_DIR.resolve("departments.csv");
+    private static final Path STUDENTS_FILE   = DATA_DIR.resolve("students.csv");
+    private static final Path TEACHERS_FILE   = DATA_DIR.resolve("teachers.csv");
+    private static final Path USERS_FILE      = DATA_DIR.resolve("users.csv");
+
+    private static AuthService authService;
+
+    public static void setAuthService(AuthService auth) {
+        authService = auth;
+    }
 
     public static void showStorageMenu() {
         boolean running = true;
-
         while (running) {
             System.out.println("""
                     
-                    --- SAVE / LOAD DATA (NIO.2 + TSV) ---
+                    --- SAVE / LOAD DATA (NIO.2 + CSV) ---
                     1. Save all data
                     2. Load all data
                     0. Back
                     """);
-
             int choice = CRUD.intInRange("Your choice: ", 0, 2);
-
             switch (choice) {
                 case 1 -> saveAll();
                 case 2 -> loadAll();
@@ -46,463 +51,343 @@ public class RegistryStorageService {
     public static void saveAll() {
         try {
             Files.createDirectories(DATA_DIR);
-
             saveUniversity();
             saveFaculties();
             saveDepartments();
             saveStudents();
             saveTeachers();
-
+            saveUsers();
             System.out.println("Data saved successfully.");
         } catch (IOException e) {
             System.out.println("Error while saving data: " + e.getMessage());
         }
     }
 
+    public static void saveStudentsSilently() {
+        silently(RegistryStorageService::saveStudents);
+    }
+
+    public static void saveTeachersSilently() {
+        silently(RegistryStorageService::saveTeachers);
+    }
+
+    public static void saveFacultiesSilently() {
+        silently(() -> {
+            saveUniversity();
+            saveFaculties();
+            saveDepartments();
+            saveStudents();
+            saveTeachers();
+        });
+    }
+
+    public static void saveDepartmentsSilently() {
+        silently(() -> {
+            saveDepartments();
+            saveStudents();
+            saveTeachers();
+        });
+    }
+
+    public static void saveUsersSilently() {
+        silently(RegistryStorageService::saveUsers);
+    }
+
+    @FunctionalInterface
+    private interface IoAction { void run() throws IOException; }
+
+    private static void silently(IoAction action) {
+        try {
+            Files.createDirectories(DATA_DIR);
+            action.run();
+        } catch (IOException e) {
+            System.out.println("[Auto-save error] " + e.getMessage());
+        }
+    }
+
     public static void loadAll() {
         try {
-            if (!hasSavedFiles()) {
-                System.out.println("No saved files found.");
-                return;
-            }
-
-            CRUD.students.clear();
-            CRUDForTeacher.teachers.clear();
-            CRUDForFaculty.faculties.clear();
-
-            University university = loadUniversity();
-            Map<String, Faculty> facultiesById = loadFaculties(university);
-            Map<String, Department> departmentsById = loadDepartments(facultiesById);
-
-            loadStudents(departmentsById);
-            loadTeachers(departmentsById);
-
-            recalculateCounters();
-
+            if (!hasSavedFiles()) { System.out.println("No saved files found."); return; }
+            clearAndLoad();
             System.out.println("Data loaded successfully.");
         } catch (IOException e) {
             System.out.println("Error while loading data: " + e.getMessage());
         }
     }
 
+    public static void loadOnStartup() {
+        System.out.println("[Storage] Reading from: " + DATA_DIR.toAbsolutePath());
+        if (!hasSavedFiles()) return;
+        try {
+            clearAndLoad();
+            System.out.println("Saved data loaded: "
+                    + CRUDForFaculty.faculties.size() + " faculties, "
+                    + CRUDForTeacher.teachers.size() + " teachers, "
+                    + CRUD.students.size() + " students.");
+        } catch (Exception e) {
+            System.out.println("[Startup load error] " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void clearAndLoad() throws IOException {
+        CRUD.students.clear();
+        CRUDForTeacher.teachers.clear();
+        CRUDForFaculty.faculties.clear();
+
+        University university = loadUniversity();
+        Map<String, Faculty>    facultiesById    = loadFaculties(university);
+        Map<String, Department> departmentsById  = loadDepartments(facultiesById);
+
+        loadStudents(departmentsById);
+        loadTeachers(departmentsById);
+        loadUsers();
+        recalculateCounters();
+    }
+
     private static boolean hasSavedFiles() {
-        return Files.exists(UNIVERSITY_FILE)
-                || Files.exists(FACULTIES_FILE)
-                || Files.exists(DEPARTMENTS_FILE)
-                || Files.exists(STUDENTS_FILE)
+        return Files.exists(UNIVERSITY_FILE) || Files.exists(FACULTIES_FILE)
+                || Files.exists(DEPARTMENTS_FILE) || Files.exists(STUDENTS_FILE)
                 || Files.exists(TEACHERS_FILE);
     }
 
     private static void saveUniversity() throws IOException {
         List<String> lines = new ArrayList<>();
         lines.add(header("fullName", "shortName", "city", "address"));
-
-        University university = extractUniversity();
-        if (university != null) {
-            lines.add(row(
-                    university.getFullName(),
-                    university.getShortName(),
-                    university.getCity(),
-                    university.getAddress()
-            ));
-        }
-
+        University u = extractUniversity();
+        if (u != null) lines.add(row(u.getFullName(), u.getShortName(), u.getCity(), u.getAddress()));
         writeAll(UNIVERSITY_FILE, lines);
     }
 
     private static void saveFaculties() throws IOException {
         List<String> lines = new ArrayList<>();
         lines.add(header("id", "fullName", "shortName", "dean", "contact"));
-
-        for (Faculty faculty : CRUDForFaculty.faculties) {
-            lines.add(row(
-                    faculty.getId(),
-                    faculty.getFullName(),
-                    faculty.getShortName(),
-                    faculty.getDean(),
-                    faculty.getContact()
-            ));
-        }
-
+        for (Faculty f : CRUDForFaculty.faculties)
+            lines.add(row(f.getId(), f.getFullName(), f.getShortName(), f.getDean(), f.getContact()));
         writeAll(FACULTIES_FILE, lines);
     }
 
     private static void saveDepartments() throws IOException {
         List<String> lines = new ArrayList<>();
         lines.add(header("id", "fullName", "head", "cabinet", "facultyId"));
-
-        for (Department department : allDepartments()) {
-            String facultyId = department.getFaculty() == null ? "" : department.getFaculty().getId();
-
-            lines.add(row(
-                    department.getId(),
-                    department.getFullName(),
-                    department.getHead(),
-                    String.valueOf(department.getCabinet()),
-                    facultyId
-            ));
+        for (Department d : allDepartments()) {
+            String facultyId = d.getFaculty() == null ? "" : d.getFaculty().getId();
+            lines.add(row(d.getId(), d.getFullName(), d.getHead(), String.valueOf(d.getCabinet()), facultyId));
         }
-
         writeAll(DEPARTMENTS_FILE, lines);
     }
 
     private static void saveStudents() throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add(header(
-                "id", "fullName", "birthDate", "email", "phone",
-                "grade", "group", "year", "formOfStudy", "status", "departmentId"
-        ));
-
-        for (Person person : CRUD.students) {
-            if (person instanceof Student student) {
-                String departmentId = student.getDepartment() == null ? "" : student.getDepartment().getId();
-
-                lines.add(row(
-                        student.getId(),
-                        student.getFullName(),
-                        formatDate(student.getBirthDate()),
-                        student.getEmail(),
-                        student.getPhone(),
-                        String.valueOf(student.getGrade()),
-                        String.valueOf(student.getGroup()),
-                        String.valueOf(student.getYear()),
-                        student.getFormOfStudy(),
-                        student.getStatus(),
-                        departmentId
-                ));
-            }
+        lines.add(header("id", "fullName", "birthDate", "email", "phone",
+                "grade", "group", "year", "formOfStudy", "status", "departmentId"));
+        for (Person p : CRUD.students) {
+            if (!(p instanceof Student s)) continue;
+            String deptId = s.getDepartment() == null ? "" : s.getDepartment().getId();
+            lines.add(row(s.getId(), s.getFullName(), formatDate(s.getBirthDate()),
+                    s.getEmail(), "\u0027" + s.getPhone(),
+                    String.valueOf(s.getGrade()), String.valueOf(s.getGroup()), String.valueOf(s.getYear()),
+                    s.getFormOfStudy(), s.getStatus(), deptId));
         }
-
         writeAll(STUDENTS_FILE, lines);
     }
 
     private static void saveTeachers() throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add(header(
-                "id", "fullName", "birthDate", "email", "phone",
-                "post", "degree", "academicRank", "startedJobDate", "rate", "departmentId"
-        ));
-
-        for (Teacher teacher : CRUDForTeacher.teachers) {
-            String departmentId = teacher.getDepartment() == null ? "" : teacher.getDepartment().getId();
-
-            lines.add(row(
-                    teacher.getId(),
-                    teacher.getFullName(),
-                    formatDate(teacher.getBirthDate()),
-                    teacher.getEmail(),
-                    teacher.getPhone(),
-                    teacher.getPost(),
-                    teacher.getDegree(),
-                    teacher.getAcademicRank(),
-                    formatDate(teacher.getStartedJobDate()),
-                    String.valueOf(teacher.getRate()),
-                    departmentId
-            ));
+        lines.add(header("id", "fullName", "birthDate", "email", "phone",
+                "post", "degree", "academicRank", "startedJobDate", "rate", "departmentId"));
+        for (Teacher t : CRUDForTeacher.teachers) {
+            String deptId = t.getDepartment() == null ? "" : t.getDepartment().getId();
+            lines.add(row(t.getId(), t.getFullName(), formatDate(t.getBirthDate()),
+                    t.getEmail(), "\u0027" + t.getPhone(),
+                    t.getPost(), t.getDegree(), t.getAcademicRank(),
+                    formatDate(t.getStartedJobDate()), String.valueOf(t.getRate()), deptId));
         }
-
         writeAll(TEACHERS_FILE, lines);
     }
 
+    private static void saveUsers() throws IOException {
+        if (authService == null) return;
+        List<String> lines = new ArrayList<>();
+        lines.add(header("username", "password", "role"));
+        for (AuthUser u : authService.getUsers().values())
+            lines.add(row(u.getUsername(), u.getPassword(), u.getRole().name()));
+        writeAll(USERS_FILE, lines);
+    }
+
+
     private static University loadUniversity() throws IOException {
         List<String> lines = readDataLines(UNIVERSITY_FILE);
-        if (lines.isEmpty()) {
-            return null;
-        }
-
-        String[] parts = splitLine(lines.get(0), 4);
-        return new University(parts[0], parts[1], parts[2], parts[3]);
+        if (lines.isEmpty()) return null;
+        String[] p = splitLine(lines.get(0), 4);
+        return new University(p[0], p[1], p[2], p[3]);
     }
 
     private static Map<String, Faculty> loadFaculties(University university) throws IOException {
-        Map<String, Faculty> facultiesById = new LinkedHashMap<>();
-        List<String> lines = readDataLines(FACULTIES_FILE);
-
-        for (String line : lines) {
-            String[] parts = splitLine(line, 5);
-
-            Faculty faculty = new Faculty(
-                    parts[0],
-                    parts[1],
-                    parts[2],
-                    parts[3],
-                    parts[4]
-            );
-
-            faculty.setDepartments(new ArrayList<>());
-            faculty.setUniversity(university);
-
-            CRUDForFaculty.faculties.add(faculty);
-            facultiesById.put(faculty.getId(), faculty);
+        Map<String, Faculty> byId = new LinkedHashMap<>();
+        for (String line : readDataLines(FACULTIES_FILE)) {
+            String[] p = splitLine(line, 5);
+            Faculty f = new Faculty(p[0], p[1], p[2], p[3], p[4]);
+            f.setDepartments(new ArrayList<>());
+            f.setUniversity(university);
+            CRUDForFaculty.faculties.add(f);
+            byId.put(f.getId(), f);
         }
-
-        if (university != null) {
+        if (university != null)
             university.setFaculties(new ArrayList<>(CRUDForFaculty.faculties));
-        }
-
-        return facultiesById;
+        return byId;
     }
 
     private static Map<String, Department> loadDepartments(Map<String, Faculty> facultiesById) throws IOException {
-        Map<String, Department> departmentsById = new LinkedHashMap<>();
-        List<String> lines = readDataLines(DEPARTMENTS_FILE);
-
-        for (String line : lines) {
-            String[] parts = splitLine(line, 5);
-
-            Department department = new Department(
-                    parts[0],
-                    parts[1],
-                    parts[2],
-                    parseInt(parts[3])
-            );
-
-            department.setTeachers(new ArrayList<>());
-            department.setStudents(new ArrayList<>());
-
-            Faculty faculty = facultiesById.get(parts[4]);
-            department.setFaculty(faculty);
-
-            if (faculty != null) {
-                if (faculty.getDepartments() == null) {
-                    faculty.setDepartments(new ArrayList<>());
-                }
-                faculty.getDepartments().add(department);
+        Map<String, Department> byId = new LinkedHashMap<>();
+        for (String line : readDataLines(DEPARTMENTS_FILE)) {
+            String[] p = splitLine(line, 5);
+            Department d = new Department(p[0], p[1], p[2], parseInt(p[3]));
+            d.setTeachers(new ArrayList<>());
+            d.setStudents(new ArrayList<>());
+            Faculty f = facultiesById.get(p[4]);
+            d.setFaculty(f);
+            if (f != null) {
+                if (f.getDepartments() == null) f.setDepartments(new ArrayList<>());
+                f.getDepartments().add(d);
             }
-
-            departmentsById.put(department.getId(), department);
+            byId.put(d.getId(), d);
         }
-
-        return departmentsById;
+        return byId;
     }
 
     private static void loadStudents(Map<String, Department> departmentsById) throws IOException {
-        List<String> lines = readDataLines(STUDENTS_FILE);
-
-        for (String line : lines) {
-            String[] parts = splitLine(line, 11);
-
-            Student student = new Student(
-                    parts[0],
-                    parts[1],
-                    parseDate(parts[2]),
-                    parts[3],
-                    parts[4],
-                    parseInt(parts[5]),
-                    parseInt(parts[6]),
-                    parseInt(parts[7]),
-                    parts[8],
-                    parts[9]
-            );
-
-            CRUD.students.add(student);
-
-            Department department = departmentsById.get(parts[10]);
-            if (department != null) {
-                department.addStudent(student);
-            }
+        for (String line : readDataLines(STUDENTS_FILE)) {
+            String[] p = splitLine(line, 11);
+            Student s = new Student(p[0], p[1], parseDate(p[2]), p[3], stripPhone(p[4]),
+                    parseInt(p[5]), parseInt(p[6]), parseInt(p[7]), p[8], p[9]);
+            CRUD.students.add(s);
+            Department d = departmentsById.get(p[10]);
+            if (d != null) d.addStudent(s);
         }
     }
 
     private static void loadTeachers(Map<String, Department> departmentsById) throws IOException {
-        List<String> lines = readDataLines(TEACHERS_FILE);
-
-        for (String line : lines) {
-            String[] parts = splitLine(line, 11);
-
-            Teacher teacher = new Teacher(
-                    parts[0],
-                    parts[1],
-                    parseDate(parts[2]),
-                    parts[3],
-                    parts[4],
-                    parts[5],
-                    parts[6],
-                    parts[7],
-                    parseDate(parts[8]),
-                    parseInt(parts[9])
-            );
-
-            CRUDForTeacher.teachers.add(teacher);
-
-            Department department = departmentsById.get(parts[10]);
-            if (department != null) {
-                department.addTeacher(teacher);
-            }
+        for (String line : readDataLines(TEACHERS_FILE)) {
+            String[] p = splitLine(line, 11);
+            Teacher t = new Teacher(p[0], p[1], parseDate(p[2]), p[3], stripPhone(p[4]),
+                    p[5], p[6], p[7], parseDate(p[8]), parseInt(p[9]));
+            CRUDForTeacher.teachers.add(t);
+            Department d = departmentsById.get(p[10]);
+            if (d != null) d.addTeacher(t);
         }
     }
 
-    private static University extractUniversity() {
-        for (Faculty faculty : CRUDForFaculty.faculties) {
-            if (faculty.getUniversity() != null) {
-                return faculty.getUniversity();
-            }
+    private static void loadUsers() throws IOException {
+        if (authService == null || !Files.exists(USERS_FILE)) return;
+        for (String line : readDataLines(USERS_FILE)) {
+            String[] p = splitLine(line, 3);
+            Role role;
+            try { role = Role.valueOf(p[2]); } catch (IllegalArgumentException e) { role = Role.USER; }
+            authService.getUsers().put(p[0], new AuthUser(p[0], p[1], role));
         }
+    }
+
+
+    private static University extractUniversity() {
+        for (Faculty f : CRUDForFaculty.faculties)
+            if (f.getUniversity() != null) return f.getUniversity();
         return null;
     }
 
     private static List<Department> allDepartments() {
         return CRUDForFaculty.faculties.stream()
-                .flatMap(faculty -> faculty.getDepartments() == null
+                .flatMap(f -> f.getDepartments() == null
                         ? Stream.<Department>empty()
-                        : faculty.getDepartments().stream())
+                        : f.getDepartments().stream())
                 .toList();
     }
 
     private static void recalculateCounters() {
         CRUD.counterOfStudents = maxNumericId(
-                CRUD.students.stream()
-                        .map(Person::getId)
-                        .toList()
-        );
-
+                CRUD.students.stream().map(Person::getId).toList());
         CRUDForTeacher.counterOfTeachers = maxNumericId(
-                CRUDForTeacher.teachers.stream()
-                        .map(Teacher::getId)
-                        .toList()
-        );
-
+                CRUDForTeacher.teachers.stream().map(Teacher::getId).toList());
         CRUDForFaculty.counterOfFaculty = maxNumericId(
-                CRUDForFaculty.faculties.stream()
-                        .map(Faculty::getId)
-                        .toList()
-        );
-
+                CRUDForFaculty.faculties.stream().map(Faculty::getId).toList());
         CRUDForDepartment.counterOfDepartments = maxNumericId(
-                allDepartments().stream()
-                        .map(Department::getId)
-                        .toList()
-        );
+                allDepartments().stream().map(Department::getId).toList());
     }
 
     private static int maxNumericId(List<String> ids) {
         int max = 0;
-
-        for (String id : ids) {
-            if (id != null && id.matches("\\d+")) {
-                max = Math.max(max, Integer.parseInt(id));
-            }
-        }
-
+        for (String id : ids)
+            if (id != null && id.matches("\\d+")) max = Math.max(max, Integer.parseInt(id));
         return max;
     }
 
     private static void writeAll(Path path, List<String> lines) throws IOException {
-        try (BufferedWriter writer = Files.newBufferedWriter(
-                path,
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING
-        )) {
-            for (String line : lines) {
-                writer.write(line);
-                writer.newLine();
-            }
+        try (BufferedWriter w = Files.newBufferedWriter(path, StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            w.write('\uFEFF');
+            for (String line : lines) { w.write(line); w.newLine(); }
         }
     }
 
     private static List<String> readDataLines(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            return List.of();
-        }
-
+        if (!Files.exists(path)) return List.of();
         List<String> result = new ArrayList<>();
-
-        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-            String line;
-            boolean firstLine = true;
-
-            while ((line = reader.readLine()) != null) {
-                if (firstLine) {
-                    firstLine = false;
-                    continue;
-                }
-
-                if (!line.isBlank()) {
-                    result.add(line);
-                }
+        try (BufferedReader r = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            String line; boolean first = true;
+            while ((line = r.readLine()) != null) {
+                if (line.startsWith("\uFEFF")) line = line.substring(1);
+                if (first) { first = false; continue; }
+                if (!line.isBlank()) result.add(line);
             }
         }
-
         return result;
     }
 
-    private static String header(String... values) {
-        return String.join("\t", values);
-    }
+    private static String header(String... values) { return row(values); }
 
     private static String row(String... values) {
-        String[] escaped = new String[values.length];
+        StringJoiner j = new StringJoiner(";");
+        for (String v : values) j.add(toCsv(v));
+        return j.toString();
+    }
 
-        for (int i = 0; i < values.length; i++) {
-            escaped[i] = escape(values[i]);
-        }
+    private static String toCsv(String value) {
+        if (value == null) return "\"\"";
+        return "\"" + value.replace("\r", " ").replace("\n", " ").replace("\"", "\"\"") + "\"";
+    }
 
-        return String.join("\t", escaped);
+    private static String toCsvPhone(String value) {
+        if (value == null) return "\"\"";
+        String safe = value.replace("\r", " ").replace("\n", " ").replace("\"", "\"\"\"");
+        return "\"\u0027" + safe + "\"";
     }
 
     private static String[] splitLine(String line, int expectedSize) {
-        String[] raw = line.split("\t", -1);
-        String[] result = new String[expectedSize];
-
-        for (int i = 0; i < expectedSize; i++) {
-            result[i] = i < raw.length ? unescape(raw[i]) : "";
-        }
-
-        return result;
-    }
-
-    private static String escape(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        return value
-                .replace("\\", "\\\\")
-                .replace("\t", "\\t")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r");
-    }
-
-    private static String unescape(String value) {
-        StringBuilder sb = new StringBuilder();
-        boolean escaping = false;
-
-        for (int i = 0; i < value.length(); i++) {
-            char ch = value.charAt(i);
-
-            if (escaping) {
-                switch (ch) {
-                    case 't' -> sb.append('\t');
-                    case 'n' -> sb.append('\n');
-                    case 'r' -> sb.append('\r');
-                    case '\\' -> sb.append('\\');
-                    default -> sb.append(ch);
-                }
-                escaping = false;
-            } else if (ch == '\\') {
-                escaping = true;
+        char sep = line.contains(";") ? ';' : ',';
+        List<String> fields = new ArrayList<>(expectedSize);
+        StringBuilder cur = new StringBuilder();
+        boolean inQuotes = false;
+        for (int i = 0; i < line.length(); i++) {
+            char ch = line.charAt(i);
+            if (inQuotes) {
+                if (ch == '"') {
+                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') { cur.append('"'); i++; }
+                    else inQuotes = false;
+                } else cur.append(ch);
             } else {
-                sb.append(ch);
+                if      (ch == '"') inQuotes = true;
+                else if (ch == sep)  { fields.add(cur.toString().trim()); cur.setLength(0); }
+                else cur.append(ch);
             }
         }
-
-        if (escaping) {
-            sb.append('\\');
-        }
-
-        return sb.toString();
+        fields.add(cur.toString().trim());
+        while (fields.size() < expectedSize) fields.add("");
+        if (fields.size() > expectedSize) return fields.subList(0, expectedSize).toArray(new String[0]);
+        return fields.toArray(new String[0]);
     }
 
-    private static String formatDate(LocalDate date) {
-        return date == null ? "" : date.toString();
-    }
-
-    private static LocalDate parseDate(String text) {
-        return text == null || text.isBlank() ? null : LocalDate.parse(text);
-    }
-
-    private static int parseInt(String text) {
-        return text == null || text.isBlank() ? 0 : Integer.parseInt(text);
-    }
+    private static String formatDate(LocalDate date) { return date == null ? "" : date.toString(); }
+    private static LocalDate parseDate(String text)  { return text == null || text.isBlank() ? null : LocalDate.parse(text); }
+    private static int parseInt(String text)         { return text == null || text.isBlank() ? 0 : Integer.parseInt(text); }
+    private static String stripPhone(String text)    { return text != null && text.startsWith("'") ? text.substring(1) : text; }
 }

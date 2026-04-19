@@ -54,6 +54,7 @@ public class CRUDForFaculty {
         Faculty newFaculty = new Faculty(id, fullName, shortName, dean, contact);
         faculties.add(newFaculty);
         System.out.println("Faculty registered successfully!");
+        RegistryStorageService.saveFacultiesSilently();
     }
 
     public static void showFaculties() {
@@ -94,6 +95,7 @@ public class CRUDForFaculty {
 
         if (isRemoved) {
             System.out.println("Success: Faculty with ID " + id + " has been removed.");
+            RegistryStorageService.saveFacultiesSilently();
         } else {
             System.out.println("Error: Failed to remove faculty with ID " + id);
         }
@@ -134,5 +136,6 @@ public class CRUDForFaculty {
             default -> System.out.println("Invalid option.");
         }
         System.out.println("Faculty information updated successfully!");
+        RegistryStorageService.saveFacultiesSilently();
     }
 }
