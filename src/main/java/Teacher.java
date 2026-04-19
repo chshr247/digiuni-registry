@@ -3,8 +3,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -32,9 +35,26 @@ public final class Teacher extends Person {
         this.rate = rate;
     }
 
-    /** Стаж роботи в роках */
-    public int getExperience() {
+    public int getExperienceYears() {
         return Period.between(startedJobDate, LocalDate.now()).getYears();
+    }
+
+    public int getExperienceMonths() {
+        return Period.between(startedJobDate, LocalDate.now()).getMonths();
+    }
+
+    public String getExperienceFormatted() {
+        Period p = Period.between(startedJobDate, LocalDate.now());
+        return p.getYears() + " yr. " + p.getMonths() + " mo.";
+    }
+
+    public String getStartedJobDateFormatted() {
+        return startedJobDate == null ? "N/A"
+                : startedJobDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+
+    public int getExperience() {
+        return getExperienceYears();
     }
 
     @Override
@@ -42,10 +62,12 @@ public final class Teacher extends Person {
         return "Teacher{" +
                 "id='" + getId() + "'" +
                 ", name='" + getFullName() + "'" +
+                ", age=" + getAge() +
                 ", post='" + post + "'" +
                 ", degree='" + degree + "'" +
                 ", rank='" + academicRank + "'" +
-                ", experience=" + getExperience() + "y" +
+                ", started=" + getStartedJobDateFormatted() +
+                ", experience=" + getExperienceFormatted() +
                 ", rate=" + rate +
                 ", department=" + (department != null ? department.getFullName() : "None") +
                 ", faculty=" + (getFaculty() != null ? getFaculty().getFullName() : "None") +

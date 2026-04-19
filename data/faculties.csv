@@ -1,7 +1,4 @@
-﻿"id";"fullName";"shortName";"dean";"contact"
-1;Faculty of Humanities;FH;Maryna Tkachuk;fgn@ukma.edu.ua
-2;Faculty of Economics;FE;Oleksandra Humenna;fen@ukma.edu.ua
-3;Faculty of Informatics;FI;Andriy Hlybovets;fi@ukma.edu.ua
-4;Faculty of Law;FL;Volodymyr Venher;fpn@ukma.edu.ua
-5;Faculty of Natural Sciences;FNS;Oleksandr Holub;fnatural@ukma.edu.ua
-6;Faculty of Social Sciences and Social Technologies;FSSST;Svitlana Oksamytna;fsnst@ukma.edu.ua
+﻿id;fullName;shortName;contact;deanId
+1;Faculty of Computer Science;FI;fi@ukma.edu.ua;1
+2;Faculty of Economic Sciences;FEN;fen@ukma.edu.ua;2
+3;Faculty of Social Sciences and Social Technologies;FSNST;fsnst@ukma.edu.ua;3

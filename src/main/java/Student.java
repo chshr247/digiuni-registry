@@ -4,6 +4,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -30,19 +31,25 @@ public final class Student extends Person {
         this.status = status;
     }
 
+    public int getStudyYears() {
+        return Period.between(LocalDate.of(year, 9, 1), LocalDate.now()).getYears();
+    }
+
     @Override
     public String toString() {
         return "Student{" +
                 "id='" + getId() + "'" +
                 ", name='" + getFullName() + "'" +
+                ", dob=" + getBirthDateFormatted() +
+                ", age=" + getAge() +
                 ", grade=" + grade +
                 ", group=" + group +
-                ", year=" + year +
+                ", enrolled=" + year +
+                ", studyYears=" + getStudyYears() +
                 ", form='" + formOfStudy + "'" +
                 ", status='" + status + "'" +
                 ", department=" + (department != null ? department.getFullName() : "None") +
                 ", faculty=" + (getFaculty() != null ? getFaculty().getFullName() : "None") +
-                ", university=" + (getUniversity() != null ? getUniversity().getFullName() : "None") +
                 "}";
     }
 

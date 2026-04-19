@@ -1,50 +1,59 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AuthService {
     protected Map<String, AuthUser> users = new HashMap<>();
     private AuthUser currentUser = null;
+    private LocalDateTime lastLoginAt = null;
+
+    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     public AuthService() {
-        users.put("admin", new AuthUser("admin", "admin", Role.ADMIN));
-        users.put("user", new AuthUser("user", "user", Role.USER));
+        users.put("admin",   new AuthUser("admin",   "admin",   Role.ADMIN));
+        users.put("user",    new AuthUser("user",    "user",    Role.USER));
         users.put("manager", new AuthUser("manager", "manager", Role.MANAGER));
     }
 
     public boolean login(String username, String password) {
         AuthUser found = users.get(username);
         if (found == null) {
+            System.out.println("Invalid username or password");
             return false;
         }
-        if (found != null && found.getPassword().equals(password)) {
+        if (found.getPassword().equals(password)) {
             currentUser = found;
-            System.out.println("Logged in as " + username);
+            lastLoginAt = LocalDateTime.now();
+            System.out.println("Logged in as " + username + " at " + lastLoginAt.format(FMT));
             return true;
         }
         System.out.println("Invalid username or password");
         return false;
     }
 
-    public void logout(){
+    public void logout() {
+        if (currentUser != null) {
+            System.out.println("Session duration: " + getSessionDuration());
+        }
         currentUser = null;
+        lastLoginAt = null;
         System.out.println("Logged out");
     }
 
-    public boolean isLoggedIn() {
-        return currentUser != null;
+    public String getSessionDuration() {
+        if (lastLoginAt == null) return "N/A";
+        long minutes = java.time.Duration.between(lastLoginAt, LocalDateTime.now()).toMinutes();
+        long seconds = java.time.Duration.between(lastLoginAt, LocalDateTime.now()).toSecondsPart();
+        return minutes + " min " + seconds + " sec";
     }
 
-    public boolean isAdmin() {
-        return isLoggedIn() && currentUser.getRole() == Role.ADMIN;
-    }
+    public boolean isLoggedIn()  { return currentUser != null; }
+    public boolean isAdmin()     { return isLoggedIn() && currentUser.getRole() == Role.ADMIN; }
+    public boolean isManager()   { return isLoggedIn() && currentUser.getRole() == Role.MANAGER; }
 
-    public boolean isManager() {
-        return isLoggedIn() && currentUser.getRole() == Role.MANAGER;
-    }
-
-    public AuthUser getCurrentUser() {
-        return currentUser;
-    }
+    public AuthUser getCurrentUser() { return currentUser; }
+    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
 
     public void requireAuth() {
         if (!isLoggedIn()) {
@@ -69,19 +78,8 @@ public class AuthService {
         }
     }
 
-    public Map<String, AuthUser> getUsers() {
-        return users;
-    }
-
-    public void addUser(AuthUser user) {
-        users.put(user.getUsername(), user);
-    }
-
-    public void removeUser(String username) {
-        users.remove(username);
-    }
-
-    public AuthUser getUser(String username) {
-        return users.get(username);
-    }
+    public Map<String, AuthUser> getUsers() { return users; }
+    public void addUser(AuthUser user)       { users.put(user.getUsername(), user); }
+    public void removeUser(String username)  { users.remove(username); }
+    public AuthUser getUser(String username) { return users.get(username); }
 }

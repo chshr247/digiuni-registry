@@ -1,6 +1,6 @@
-﻿"id";"fullName";"birthDate";"email";"phone";"post";"degree";"academicRank";"startedJobDate";"rate";"departmentId"
-"1";"Andriy Hlybovets";"1980-05-15";"a.hlybovets@ukma.edu.ua";"'+380501112233";"1";"2";"1";"2010-09-01";"15";"3"
-"2";"Volodymyr Venher";"1975-11-02";"v.venher@ukma.edu.ua";"'+380672223344";"2";"1";"2";"2005-08-25";"12";"4"
-"3";"Oleksandra Humenna";"1982-03-20";"o.humenna@ukma.edu.ua";"'+380633334455";"1";"3";"1";"2012-01-15";"10";"2"
-"4";"Oleksandr Holub";"1968-07-11";"o.holub@ukma.edu.ua";"'+380994445566";"3";"1";"3";"1998-09-01";"18";"5"
-"5";"Svitlana Oksamytna";"1972-09-30";"s.oksamytna@ukma.edu.ua";"'+380965556677";"1";"2";"2";"2002-09-01";"14";"6"
+﻿id;lastName;firstName;patronymic;birthDate;email;phone;post;degree;academicRank;startedJobDate;rate;departmentId
+1;Glybovets;Andriy;Mykolayovych;2007-01-28;a.glybovets@ukma.edu.ua;'+380509831589;Head;Master;Super;2008-01-29;10;1
+2;Lukianenko;Iryna;Hryhorivna;1970-05-15;lukianenko@ukma.edu.ua;+380501112233;Head;PhD;Docent;2005-09-01;10;3
+3;Oksamytna;Svitlana;Mykolaivna;1968-11-20;oksamytna@ukma.edu.ua;+380501112244;Head;Doctor;Professor;2002-09-01;10;4
+4;Taranuha;Volodymyr;Yuriyovych;1980-03-10;taranuha@ukma.edu.ua;+380501112255;Head;PhD;Docent;2010-09-01;10;2
+5;Shevchenko;Taras;Ivanovych;1990-08-24;shevchenko.t@ukma.edu.ua;+380501112266;Assistant;Master;None;2020-09-01;5;1

@@ -23,9 +23,9 @@ public class Main {
             System.out.println("""
                    --- MAIN MENU ---
                     0. Logout and exit
-                    1. Search students
+                    1. Search and reports
                     2. Show all entities
-                    7. Reports and statistics
+                    7. Save / Load data (CSV)
                     8. Reflection and annotations
                    --- MANAGER ONLY ---
                     3. Add entity
@@ -45,8 +45,7 @@ public class Main {
                     case 4 -> { auth.requireManager(); showUpdateMenu(auth); }
                     case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
                     case 6 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
-                    case 7 -> { auth.requireAuth(); StreamReports.showReportsMenu();
-                        RegistryStorageService.showStorageMenu();}
+                    case 7 -> { auth.requireAuth(); RegistryStorageService.showStorageMenu();}
                     case 8 -> { auth.requireAuth(); ReflectionModule.showReflectionMenu(); }
                     case 0 -> { auth.logout(); running = false; }
                 }
@@ -59,19 +58,7 @@ public class Main {
     }
 
     private static void showSearchMenu(AuthService auth) {
-        System.out.println("\n--- SEARCH STUDENTS ---");
-        System.out.println("1. Search by name");
-        System.out.println("2. Search by group");
-        System.out.println("3. Search by grade");
-        System.out.println("0. Back");
-
-        int choice = CRUD.intInRange("Your choice: ", 0, 3);
-        switch (choice) {
-            case 1 -> CRUD.searchByFullName();
-            case 2 -> CRUD.searchByGroup();
-            case 3 -> CRUD.searchByGrade();
-            case 0 -> {}
-        }
+        StreamReports.showReportsMenu();
     }
 
     private static void showAddMenu(AuthService auth) {
