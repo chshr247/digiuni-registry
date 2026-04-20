@@ -149,7 +149,7 @@ public class UniversityServer implements Runnable {
             CRUD.students.stream()
                     .filter(Student.class::isInstance)
                     .map(p -> (Student) p)
-                    .sorted(java.util.Comparator.comparing(Student::getLastName))
+                    .sorted(java.util.Comparator.comparingInt(s -> Integer.parseInt(s.getId())))
                     .forEach(s -> sb.append("<tr>")
                             .append("<td>").append(s.getId()).append("</td>")
                             .append("<td>").append(esc(s.getFullName())).append("</td>")
@@ -177,7 +177,7 @@ public class UniversityServer implements Runnable {
                     .append("<th>Rate</th><th>Department</th></tr>");
 
             CRUDForTeacher.teachers.stream()
-                    .sorted(java.util.Comparator.comparing(Teacher::getLastName))
+                    .sorted(java.util.Comparator.comparingInt(t -> Integer.parseInt(t.getId())))
                     .forEach(t -> sb.append("<tr>")
                             .append("<td>").append(t.getId()).append("</td>")
                             .append("<td>").append(esc(t.getFullName())).append("</td>")
@@ -226,7 +226,7 @@ public class UniversityServer implements Runnable {
 
             CRUDForFaculty.faculties.stream()
                     .flatMap(f -> f.getDepartments().stream())
-                    .sorted(java.util.Comparator.comparing(Department::getFullName))
+                    .sorted(java.util.Comparator.comparingInt(d -> Integer.parseInt(d.getId())))
                     .forEach(d -> sb.append("<tr>")
                             .append("<td>").append(d.getId()).append("</td>")
                             .append("<td>").append(esc(d.getFullName())).append("</td>")
