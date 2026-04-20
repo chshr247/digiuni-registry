@@ -1,3 +1,6 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -6,6 +9,8 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class CRUD {
+    private static final Logger log = LoggerFactory.getLogger(CRUD.class);
+
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Person> students = new ArrayList<>();
     public static int counterOfStudents = 0;
@@ -15,7 +20,9 @@ public class CRUD {
         do {
             System.out.print(message);
             input = scanner.nextLine().trim();
-            if (input.isEmpty()) System.out.println("Error: field cannot be empty.");
+            if (input.isEmpty()) {
+                System.out.println("Error: field cannot be empty.");
+            }
         } while (input.isEmpty());
         return input;
     }
@@ -26,9 +33,11 @@ public class CRUD {
             try {
                 System.out.print(message);
                 value = Integer.parseInt(scanner.nextLine());
-                if (value < min || value > max)
+                if (value < min || value > max) {
                     System.out.println("Error: value must be between " + min + " and " + max);
-                else return value;
+                } else {
+                    return value;
+                }
             } catch (NumberFormatException e) {
                 System.out.println("Error: enter a number.");
             }
@@ -66,7 +75,10 @@ public class CRUD {
         }
 
         String departmentId = readNonEmptyString("Enter department ID: ");
-        Department department = CRUDForDepartment.findDepartmentByIdOptional(faculty.getDepartments(), departmentId).orElse(null);
+        Department department = CRUDForDepartment
+                .findDepartmentByIdOptional(faculty.getDepartments(), departmentId)
+                .orElse(null);
+
         if (department == null) {
             System.out.println("No department found for this ID.");
             return null;
@@ -77,19 +89,21 @@ public class CRUD {
 
     public static void create() {
         Department department = chooseDepartment();
-        if (department == null) return;
+        if (department == null) {
+            return;
+        }
 
         counterOfStudents++;
         String id = String.valueOf(counterOfStudents);
-        String lastName   = readNonEmptyString("Enter Last Name: ");
-        String firstName  = readNonEmptyString("Enter First Name: ");
+        String lastName = readNonEmptyString("Enter Last Name: ");
+        String firstName = readNonEmptyString("Enter First Name: ");
         String patronymic = readNonEmptyString("Enter Patronymic: ");
         LocalDate birthDate = readDate("Enter Birth Date");
         String email = readNonEmptyString("Enter Email: ");
         String phone = readNonEmptyString("Enter Phone Number: ");
         int grade = intInRange("Enter Grade (1-6): ", 1, 6);
         int group = intInRange("Enter Group (1-3): ", 1, 3);
-        int year  = intInRange("Enter Year of Entering: ", 2000, 2100);
+        int year = intInRange("Enter Year of Entering: ", 2000, 2100);
 
         System.out.println("Form of study: 1 - Budget  2 - Contract");
         String form = intInRange("Your choice: ", 1, 2) == 1 ? "Budget" : "Contract";
@@ -101,54 +115,74 @@ public class CRUD {
             default -> "Deducted";
         };
 
-        Student s = new Student(id, lastName, firstName, patronymic, birthDate, email, phone,
-                grade, group, year, form, status);
+        Student s = new Student(
+                id, lastName, firstName, patronymic, birthDate, email, phone,
+                grade, group, year, form, status
+        );
+
         students.add(s);
         s.setDepartment(department);
         department.addStudent(s);
+
         System.out.println("Student registered successfully!");
+        log.info("STUDENT CREATED id={} name={}", s.getId(), s.getFullName());
         RegistryStorageService.saveStudentsSilently();
     }
 
     public static void showStudents() {
-        if (students.isEmpty()) System.out.println("No students found.");
-        else students.forEach(System.out::println);
+        if (students.isEmpty()) {
+            System.out.println("No students found.");
+        } else {
+            students.forEach(System.out::println);
+        }
     }
 
     public static void searchByFullName() {
         String query = readNonEmptyString("Enter name (or part of it): ").toLowerCase();
         boolean found = false;
+
         for (Person p : students) {
             if (p instanceof Student s && s.getFullName().toLowerCase().contains(query)) {
                 System.out.println(s);
                 found = true;
             }
         }
-        if (!found) System.out.println("No students found");
+
+        if (!found) {
+            System.out.println("No students found");
+        }
     }
 
     public static void searchByGroup() {
         int group = intInRange("Enter group (1-3): ", 1, 3);
         boolean found = false;
+
         for (Person p : students) {
             if (p instanceof Student s && s.getGroup() == group) {
                 System.out.println(s);
                 found = true;
             }
         }
-        if (!found) System.out.println("No students found");
+
+        if (!found) {
+            System.out.println("No students found");
+        }
     }
 
     public static void searchByGrade() {
         int grade = intInRange("Enter grade (1-6): ", 1, 6);
         boolean found = false;
+
         for (Person p : students) {
             if (p instanceof Student s && s.getGrade() == grade) {
                 System.out.println(s);
                 found = true;
             }
         }
-        if (!found) System.out.println("No students found");
+
+        if (!found) {
+            System.out.println("No students found");
+        }
     }
 
     public static void showAllStudentsByCourse() {
@@ -156,22 +190,28 @@ public class CRUD {
             System.out.println("No students found.");
             return;
         }
+
         for (int grade = 1; grade <= 6; grade++) {
             System.out.println("*==* Grade " + grade + " *==*");
             boolean found = false;
+
             for (Person p : students) {
                 if (p instanceof Student s && s.getGrade() == grade) {
                     System.out.println(s);
                     found = true;
                 }
             }
-            if (!found) System.out.println("  No students in this grade");
+
+            if (!found) {
+                System.out.println("  No students in this grade");
+            }
         }
     }
 
     public static void update() {
         String id = readNonEmptyString("Enter student ID for updating: ");
         Student target;
+
         try {
             target = requireStudentById(id);
         } catch (EntityNotFoundException e) {
@@ -189,15 +229,15 @@ public class CRUD {
 
         int choice = intInRange("Your choice: ", 0, 12);
         switch (choice) {
-            case 1  -> target.setLastName(readNonEmptyString("New Last Name: "));
-            case 2  -> target.setFirstName(readNonEmptyString("New First Name: "));
-            case 3  -> target.setPatronymic(readNonEmptyString("New Patronymic: "));
-            case 4  -> target.setBirthDate(readDate("New Birth Date"));
-            case 5  -> target.setEmail(readNonEmptyString("New Email: "));
-            case 6  -> target.setPhone(readNonEmptyString("New Phone: "));
-            case 7  -> target.setGrade(intInRange("New Grade (1-6): ", 1, 6));
-            case 8  -> target.setGroup(intInRange("New Group (1-3): ", 1, 3));
-            case 9  -> target.setYear(intInRange("New Year: ", 2000, 2100));
+            case 1 -> target.setLastName(readNonEmptyString("New Last Name: "));
+            case 2 -> target.setFirstName(readNonEmptyString("New First Name: "));
+            case 3 -> target.setPatronymic(readNonEmptyString("New Patronymic: "));
+            case 4 -> target.setBirthDate(readDate("New Birth Date"));
+            case 5 -> target.setEmail(readNonEmptyString("New Email: "));
+            case 6 -> target.setPhone(readNonEmptyString("New Phone: "));
+            case 7 -> target.setGrade(intInRange("New Grade (1-6): ", 1, 6));
+            case 8 -> target.setGroup(intInRange("New Group (1-3): ", 1, 3));
+            case 9 -> target.setYear(intInRange("New Year: ", 2000, 2100));
             case 10 -> {
                 System.out.println("1 - Budget  2 - Contract");
                 target.setFormOfStudy(intInRange("Your choice: ", 1, 2) == 1 ? "Budget" : "Contract");
@@ -213,23 +253,29 @@ public class CRUD {
             case 12 -> {
                 Department newDept = chooseDepartment();
                 if (newDept != null) {
-                    if (target.getDepartment() != null) target.getDepartment().removeStudent(target);
+                    if (target.getDepartment() != null) {
+                        target.getDepartment().removeStudent(target);
+                    }
                     newDept.addStudent(target);
                     System.out.println("Student transferred to: " + newDept.getFullName());
+                    log.info("STUDENT TRANSFERRED id={} to dept={}", target.getId(), newDept.getFullName());
                 }
             }
-            case 0  -> {
+            case 0 -> {
                 System.out.println("Cancelled.");
                 return;
             }
         }
+
         System.out.println("Student updated successfully!");
+        log.info("STUDENT UPDATED id={} name={}", target.getId(), target.getFullName());
         RegistryStorageService.saveStudentsSilently();
     }
 
     public static void delete() {
         String id = readNonEmptyString("Enter student ID to remove: ");
         Student toRemove;
+
         try {
             toRemove = requireStudentById(id);
         } catch (EntityNotFoundException e) {
@@ -238,8 +284,12 @@ public class CRUD {
         }
 
         students.remove(toRemove);
-        if (toRemove.getDepartment() != null) toRemove.getDepartment().removeStudent(toRemove);
+        if (toRemove.getDepartment() != null) {
+            toRemove.getDepartment().removeStudent(toRemove);
+        }
+
         System.out.println("Success: Student with ID " + id + " has been removed.");
+        log.info("STUDENT DELETED id={}", id);
         RegistryStorageService.saveStudentsSilently();
     }
 }
