@@ -1,3 +1,5 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -5,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class CRUD {
+    private static final Logger log = LoggerFactory.getLogger(CRUD.class);
+
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Person> students = new ArrayList<>();
     public static int counterOfStudents = 0;
@@ -91,6 +95,7 @@ public class CRUD {
         s.setDepartment(department);
         department.addStudent(s);
         System.out.println("Student registered successfully!");
+        log.info("STUDENT CREATED id={} name={}", s.getId(), s.getFullName());
         RegistryStorageService.saveStudentsSilently();
     }
 
@@ -183,11 +188,13 @@ public class CRUD {
                     if (target.getDepartment() != null) target.getDepartment().removeStudent(target);
                     newDept.addStudent(target);
                     System.out.println("Student transferred to: " + newDept.getFullName());
+                    log.info("STUDENT TRANSFERRED id={} to dept={}", target.getId(), newDept.getFullName());
                 }
             }
             case 0  -> { System.out.println("Cancelled."); return; }
         }
         System.out.println("Student updated successfully!");
+        log.info("STUDENT UPDATED id={} name={}", target.getId(), target.getFullName());
         RegistryStorageService.saveStudentsSilently();
     }
 
@@ -201,6 +208,7 @@ public class CRUD {
             students.remove(toRemove);
             if (toRemove.getDepartment() != null) toRemove.getDepartment().removeStudent(toRemove);
             System.out.println("Success: Student with ID " + id + " has been removed.");
+            log.info("STUDENT DELETED id={}", id);
             RegistryStorageService.saveStudentsSilently();
         } else {
             System.out.println("Error: No student found with ID " + id);

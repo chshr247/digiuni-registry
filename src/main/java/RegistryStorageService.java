@@ -1,3 +1,5 @@
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,7 +15,9 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
+@Slf4j
 public class RegistryStorageService {
+
 
     private static final Path DATA_DIR = Path.of("data");
     private static final Path UNIVERSITY_FILE = DATA_DIR.resolve("university.csv");
@@ -47,6 +51,7 @@ public class RegistryStorageService {
             return true;
         } catch (IOException e) {
             System.out.println("[Lock error] " + e.getMessage());
+            log.error("LOCK ERROR: {}", e.getMessage());
             return false;
         }
     }
@@ -80,8 +85,10 @@ public class RegistryStorageService {
             saveTeachers();
             saveUsers();
             System.out.println("Data saved successfully.");
+            log.info("DATA SAVED all files");
         } catch (IOException e) {
             System.out.println("Error while saving data: " + e.getMessage());
+            log.error("SAVE ERROR: {}", e.getMessage());
         }
     }
 
@@ -124,6 +131,7 @@ public class RegistryStorageService {
             action.run();
         } catch (IOException e) {
             System.out.println("[Auto-save error] " + e.getMessage());
+            log.error("AUTO-SAVE ERROR: {}", e.getMessage());
         }
     }
 
@@ -132,6 +140,7 @@ public class RegistryStorageService {
             if (!hasSavedFiles()) { System.out.println("No saved files found."); return; }
             clearAndLoad();
             System.out.println("Data loaded successfully.");
+            log.info("DATA LOADED successfully");
         } catch (IOException e) {
             System.out.println("Error while loading data: " + e.getMessage());
         }
@@ -148,6 +157,7 @@ public class RegistryStorageService {
                     + CRUD.students.size() + " students.");
         } catch (Exception e) {
             System.out.println("[Startup load error] " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            log.error("STARTUP LOAD ERROR {}: {}", e.getClass().getSimpleName(), e.getMessage());
             e.printStackTrace();
         }
     }
@@ -294,6 +304,7 @@ public class RegistryStorageService {
                 if (d != null) d.addStudent(s);
             } catch (Exception e) {
                 System.out.println("[Load warning] Skipped invalid student row: " + e.getMessage());
+                log.warn("LOAD SKIP invalid student row: {}", e.getMessage());
             }
         }
     }
@@ -309,6 +320,7 @@ public class RegistryStorageService {
                 if (d != null) d.addTeacher(t);
             } catch (Exception e) {
                 System.out.println("[Load warning] Skipped invalid teacher row: " + e.getMessage());
+                log.warn("LOAD SKIP invalid teacher row: {}", e.getMessage());
             }
         }
     }

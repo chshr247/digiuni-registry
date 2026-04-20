@@ -1,9 +1,13 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     protected Map<String, AuthUser> users = new HashMap<>();
     private AuthUser currentUser = null;
     private LocalDateTime lastLoginAt = null;
@@ -20,15 +24,18 @@ public class AuthService {
         AuthUser found = users.get(username);
         if (found == null) {
             System.out.println("Invalid username or password");
+            log.warn("LOGIN FAILED username={}", username);
             return false;
         }
         if (found.getPassword().equals(password)) {
             currentUser = found;
             lastLoginAt = LocalDateTime.now();
             System.out.println("Logged in as " + username + " at " + lastLoginAt.format(FMT));
+            log.info("LOGIN user={} role={}", username, found.getRole());
             return true;
         }
         System.out.println("Invalid username or password");
+        log.warn("LOGIN FAILED unknown username={}", username);
         return false;
     }
 
@@ -39,6 +46,7 @@ public class AuthService {
         currentUser = null;
         lastLoginAt = null;
         System.out.println("Logged out");
+        log.info("LOGOUT user={} duration={}", currentUser != null ? currentUser.getUsername() : "?", getSessionDuration());
     }
 
     public String getSessionDuration() {
@@ -58,6 +66,7 @@ public class AuthService {
     public void requireAuth() {
         if (!isLoggedIn()) {
             System.out.println("Access denied. Please log in first.");
+            log.warn("ACCESS DENIED not authenticated");
             throw new RuntimeException("Not authenticated");
         }
     }
@@ -66,6 +75,7 @@ public class AuthService {
         requireAuth();
         if (!isAdmin()) {
             System.out.println("Access denied. This action requires ADMIN role.");
+            log.warn("ACCESS DENIED requires ADMIN, current={}", currentUser.getRole());
             throw new RuntimeException("Not authorized");
         }
     }
@@ -74,6 +84,7 @@ public class AuthService {
         requireAuth();
         if (!isManager() && !isAdmin()) {
             System.out.println("Access denied. This action requires MANAGER or ADMIN role.");
+            log.warn("ACCESS DENIED requires MANAGER+, current={}", currentUser.getRole());
             throw new RuntimeException("Not authorized");
         }
     }

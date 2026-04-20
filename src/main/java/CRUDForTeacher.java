@@ -1,3 +1,5 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -6,6 +8,8 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class CRUDForTeacher {
+    private static final Logger log = LoggerFactory.getLogger(CRUDForTeacher.class);
+
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Teacher> teachers = new ArrayList<>();
     public static int counterOfTeachers = 0;
@@ -86,6 +90,7 @@ public class CRUDForTeacher {
         t.setDepartment(department);
         department.addTeacher(t);
         System.out.println("Teacher registered successfully!");
+        log.info("TEACHER CREATED id={} name={}", t.getId(), t.getFullName());
         RegistryStorageService.saveTeachersSilently();
     }
 
@@ -133,6 +138,7 @@ public class CRUDForTeacher {
             case 0  -> { System.out.println("Cancelled."); return; }
         }
         System.out.println("Teacher updated successfully!");
+        log.info("TEACHER UPDATED id={} name={}", target.getId(), target.getFullName());
         RegistryStorageService.saveTeachersSilently();
     }
 
@@ -149,15 +155,18 @@ public class CRUDForTeacher {
                 if (toRemove.equals(f.getDean())) {
                     f.setDean(null);
                     System.out.println("  [Dean unassigned from faculty: " + f.getFullName() + "]");
+                    log.info("DEAN UNASSIGNED faculty={}", f.getFullName());
                 }
                 for (Department d : f.getDepartments()) {
                     if (toRemove.equals(d.getHead())) {
                         d.setHead(null);
                         System.out.println("  [Head unassigned from department: " + d.getFullName() + "]");
+                        log.info("HEAD UNASSIGNED dept={}", d.getFullName());
                     }
                 }
             }
             System.out.println("Success: Teacher with ID " + id + " has been removed.");
+            log.info("TEACHER DELETED id={}", id);
             RegistryStorageService.saveTeachersSilently();
             RegistryStorageService.saveFacultiesSilently();
         } else {
