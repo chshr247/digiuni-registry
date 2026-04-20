@@ -38,6 +38,13 @@ public class AuthService {
         }
 
         AuthUser found = foundOptional.get();
+
+        if (found.isBlocked()) {
+            System.out.println("Account is blocked. Contact administrator.");
+            log.warn("LOGIN BLOCKED username={}", username);
+            return false;
+        }
+
         if (found.getPassword().equals(password)) {
             currentUser = found;
             lastLoginAt = LocalDateTime.now();

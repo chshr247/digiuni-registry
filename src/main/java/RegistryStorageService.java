@@ -246,9 +246,10 @@ public class RegistryStorageService {
     private static void saveUsers() throws IOException {
         if (authService == null) return;
         List<String> lines = new ArrayList<>();
-        lines.add(header("username", "password", "role"));
+        lines.add(header("username", "password", "role", "blocked"));
         for (AuthUser u : authService.getUsers().values())
-            lines.add(row(u.getUsername(), u.getPassword(), u.getRole().name()));
+            lines.add(row(u.getUsername(), u.getPassword(), u.getRole().name(),
+                    String.valueOf(u.isBlocked())));
         writeAll(USERS_FILE, lines);
     }
 
@@ -351,10 +352,13 @@ public class RegistryStorageService {
     private static void loadUsers() throws IOException {
         if (authService == null || !Files.exists(USERS_FILE)) return;
         for (String line : readDataLines(USERS_FILE)) {
-            String[] p = splitLine(line, 3);
+            String[] p = splitLine(line, 4);
             Role role;
             try { role = Role.valueOf(p[2]); } catch (IllegalArgumentException e) { role = Role.USER; }
-            authService.getUsers().put(p[0], new AuthUser(p[0], p[1], role));
+            boolean blocked = "true".equalsIgnoreCase(p[3]);
+            AuthUser u = new AuthUser(p[0], p[1], role);
+            u.setBlocked(blocked);
+            authService.getUsers().put(p[0], u);
         }
     }
 

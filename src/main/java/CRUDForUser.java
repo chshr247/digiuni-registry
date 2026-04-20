@@ -38,7 +38,10 @@ public class CRUDForUser {
 
     public static void showUsers(AuthService auth) {
         System.out.println("All users:");
-        auth.getUsers().forEach((username, user) -> System.out.println(username + " - " + user.getRole()));
+        auth.getUsers().forEach((username, user) ->
+                System.out.println("  " + username
+                        + " | role: " + user.getRole()
+                        + (user.isBlocked() ? " | [BLOCKED]" : " | [active]")));
     }
 
     public static void addUser(AuthService auth) {
@@ -77,14 +80,15 @@ public class CRUDForUser {
         System.out.println("Choose what to update:");
         System.out.println("1. Password");
         System.out.println("2. Role");
-        int choice = intInRange("Your choice: ", 1, 2);
+        System.out.println("3. " + (user.isBlocked() ? "Unblock" : "Block") + " user");
+        int choice = intInRange("Your choice: ", 1, 3);
         if (choice == 1) {
             String newPass = readNonEmptyString("Enter new password: ");
             user.setPassword(newPass);
             System.out.println("Password updated!");
             log.info("USER PASSWORD CHANGED username={}", username);
             RegistryStorageService.saveUsersSilently();
-        } else {
+        } else if (choice == 2) {
             System.out.println("Choose new role:");
             System.out.println("1. USER");
             System.out.println("2. MANAGER");
@@ -99,6 +103,12 @@ public class CRUDForUser {
             user.setRole(newRole);
             System.out.println("Role updated!");
             log.info("USER ROLE CHANGED username={} newRole={}", username, newRole);
+            RegistryStorageService.saveUsersSilently();
+        } else {
+            user.setBlocked(!user.isBlocked());
+            String status = user.isBlocked() ? "blocked" : "unblocked";
+            System.out.println("User " + username + " is now " + status + ".");
+            log.info("USER {} username={}", status.toUpperCase(), username);
             RegistryStorageService.saveUsersSilently();
         }
     }

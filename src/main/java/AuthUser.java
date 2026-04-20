@@ -9,6 +9,7 @@ public class AuthUser {
     private final String username;
     private String password;
     private Role role;
+    private boolean blocked;
     @lombok.ToString.Exclude
     private Person person;
 
@@ -16,6 +17,7 @@ public class AuthUser {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.blocked = false;
     }
 
     @Override
@@ -23,6 +25,7 @@ public class AuthUser {
         return "AuthUser{" +
                 "username='" + username + '\'' +
                 ", role=" + role +
+                ", blocked=" + blocked +
                 ", person='" + (person != null ? person.getFullName() : "null") + '\'' +
                 '}';
     }

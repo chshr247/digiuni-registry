@@ -1,0 +1,5 @@
+﻿"username";"password";"role";"blocked"
+"manager";"manager";"MANAGER";"false"
+"admin";"admin";"ADMIN";"false"
+"hello";"test";"ADMIN";"true"
+"user";"user";"USER";"false"
