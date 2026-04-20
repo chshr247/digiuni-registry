@@ -10,10 +10,6 @@ public class CRUDForTeacher {
     static ArrayList<Teacher> teachers = new ArrayList<>();
     public static int counterOfTeachers = 0;
 
-    public static class TeacherNotFoundException extends RuntimeException {
-        public TeacherNotFoundException(String message) { super(message); }
-    }
-
     private static String readNonEmptyString(String message) {
         String input;
         do {
@@ -54,11 +50,17 @@ public class CRUDForTeacher {
 
     private static Department chooseDepartment() {
         String facultyId = readNonEmptyString("Enter faculty ID: ");
-        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
-        if (faculty == null) { System.out.println("No faculty found for this ID."); return null; }
+        Faculty faculty = CRUDForFaculty.findFacultyByIdOptional(facultyId).orElse(null);
+        if (faculty == null) {
+            System.out.println("No faculty found for this ID.");
+            return null;
+        }
         String departmentId = readNonEmptyString("Enter department ID: ");
-        Department department = CRUDForDepartment.findDepartmentById(faculty.getDepartments(), departmentId);
-        if (department == null) { System.out.println("No department found for this ID."); return null; }
+        Department department = CRUDForDepartment.findDepartmentByIdOptional(faculty.getDepartments(), departmentId).orElse(null);
+        if (department == null) {
+            System.out.println("No department found for this ID.");
+            return null;
+        }
         return department;
     }
 
@@ -95,19 +97,23 @@ public class CRUDForTeacher {
     }
 
     public static Optional<Teacher> findTeacherByIdOptional(String id) {
-        return teachers.stream().filter(t -> t.getId().equals(id)).findFirst();
+        return RepositoryRegistry.teachers().findById(id);
     }
 
     public static Teacher findTeacherById(String id) {
         return findTeacherByIdOptional(id)
-                .orElseThrow(() -> new TeacherNotFoundException("No teacher found for ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("No teacher found for ID: " + id));
     }
 
     public static void update() {
         String id = readNonEmptyString("Enter teacher ID for updating: ");
         Teacher target;
-        try { target = findTeacherById(id); }
-        catch (TeacherNotFoundException e) { System.out.println(e.getMessage()); return; }
+        try {
+            target = findTeacherById(id);
+        } catch (EntityNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         System.out.println("Teacher found: " + target.getFullName());
         System.out.println("""
@@ -130,7 +136,10 @@ public class CRUDForTeacher {
             case 9  -> target.setAcademicRank(readNonEmptyString("New Academic Rank: "));
             case 10 -> target.setStartedJobDate(readDate("New Start Date"));
             case 11 -> target.setRate(intInRange("New Rate (1-10): ", 1, 10));
-            case 0  -> { System.out.println("Cancelled."); return; }
+            case 0  -> {
+                System.out.println("Cancelled.");
+                return;
+            }
         }
         System.out.println("Teacher updated successfully!");
         RegistryStorageService.saveTeachersSilently();
@@ -138,17 +147,17 @@ public class CRUDForTeacher {
 
     public static void delete() {
         String id = readNonEmptyString("Enter teacher ID to remove: ");
-        Teacher toRemove = null;
-        for (Teacher t : teachers) {
-            if (t.getId().equals(id)) { toRemove = t; break; }
+        Teacher toRemove;
+        try {
+            toRemove = findTeacherById(id);
+        } catch (EntityNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
         }
-        if (toRemove != null) {
-            teachers.remove(toRemove);
-            if (toRemove.getDepartment() != null) toRemove.getDepartment().removeTeacher(toRemove);
-            System.out.println("Success: Teacher with ID " + id + " has been removed.");
-            RegistryStorageService.saveTeachersSilently();
-        } else {
-            System.out.println("Error: No teacher found with ID " + id);
-        }
+
+        teachers.remove(toRemove);
+        if (toRemove.getDepartment() != null) toRemove.getDepartment().removeTeacher(toRemove);
+        System.out.println("Success: Teacher with ID " + id + " has been removed.");
+        RegistryStorageService.saveTeachersSilently();
     }
 }

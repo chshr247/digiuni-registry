@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class CRUDForDepartment {
@@ -30,16 +31,35 @@ public class CRUDForDepartment {
         }
     }
 
+    public static Optional<Department> findDepartmentByIdOptional(ArrayList<Department> departments, String id) {
+        if (departments == null) {
+            return Optional.empty();
+        }
+        return departments.stream()
+                .filter(department -> department.getId().equals(id))
+                .findFirst();
+    }
+
+    public static Optional<Department> findDepartmentByIdOptional(String id) {
+        return RepositoryRegistry.departments().findById(id);
+    }
+
     public static Department findDepartmentById(ArrayList<Department> departments, String id) {
-        for (Department d : departments)
-            if (d.getId().equals(id)) return d;
-        return null;
+        return findDepartmentByIdOptional(departments, id).orElse(null);
+    }
+
+    public static Department requireDepartmentById(ArrayList<Department> departments, String id) {
+        return findDepartmentByIdOptional(departments, id)
+                .orElseThrow(() -> new EntityNotFoundException("No department found with ID: " + id));
     }
 
     public static void createDepartment() {
         String facultyId = readNonEmptyString("Enter faculty ID: ");
-        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
-        if (faculty == null) { System.out.println("No faculty found for ID: " + facultyId); return; }
+        Faculty faculty = CRUDForFaculty.findFacultyByIdOptional(facultyId).orElse(null);
+        if (faculty == null) {
+            System.out.println("No faculty found for ID: " + facultyId);
+            return;
+        }
 
         counterOfDepartments++;
         String id       = String.valueOf(counterOfDepartments);
@@ -54,7 +74,10 @@ public class CRUDForDepartment {
         String headId = scanner.nextLine().trim();
         if (!headId.isEmpty()) {
             CRUDForTeacher.findTeacherByIdOptional(headId).ifPresentOrElse(
-                    t -> { d.setHead(t); System.out.println("Head set: " + t.getFullName()); },
+                    teacher -> {
+                        d.setHead(teacher);
+                        System.out.println("Head set: " + teacher.getFullName());
+                    },
                     () -> System.out.println("Teacher not found, head not assigned.")
             );
         }
@@ -65,9 +88,15 @@ public class CRUDForDepartment {
 
     public static void showDepartmentsOfFaculty() {
         String facultyId = readNonEmptyString("Enter faculty ID: ");
-        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
-        if (faculty == null) { System.out.println("No faculty found for ID: " + facultyId); return; }
-        if (faculty.getDepartments().isEmpty()) { System.out.println("This faculty has no departments."); return; }
+        Faculty faculty = CRUDForFaculty.findFacultyByIdOptional(facultyId).orElse(null);
+        if (faculty == null) {
+            System.out.println("No faculty found for ID: " + facultyId);
+            return;
+        }
+        if (faculty.getDepartments().isEmpty()) {
+            System.out.println("This faculty has no departments.");
+            return;
+        }
 
         System.out.println("Departments of: " + faculty.getFullName());
         faculty.getDepartments().forEach(System.out::println);
@@ -75,12 +104,20 @@ public class CRUDForDepartment {
 
     public static void updateDepartment() {
         String facultyId = readNonEmptyString("Enter faculty ID: ");
-        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
-        if (faculty == null) { System.out.println("No faculty found for ID: " + facultyId); return; }
+        Faculty faculty = CRUDForFaculty.findFacultyByIdOptional(facultyId).orElse(null);
+        if (faculty == null) {
+            System.out.println("No faculty found for ID: " + facultyId);
+            return;
+        }
 
         String deptId = readNonEmptyString("Enter department ID: ");
-        Department target = findDepartmentById(faculty.getDepartments(), deptId);
-        if (target == null) { System.out.println("No department found with ID: " + deptId); return; }
+        Department target;
+        try {
+            target = requireDepartmentById(faculty.getDepartments(), deptId);
+        } catch (EntityNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         System.out.println("Department: " + target.getFullName());
         System.out.println("""
@@ -95,11 +132,17 @@ public class CRUDForDepartment {
                 System.out.print("Enter teacher ID for head: ");
                 String headId = scanner.nextLine().trim();
                 CRUDForTeacher.findTeacherByIdOptional(headId).ifPresentOrElse(
-                        t -> { target.setHead(t); System.out.println("Head set: " + t.getFullName()); },
+                        teacher -> {
+                            target.setHead(teacher);
+                            System.out.println("Head set: " + teacher.getFullName());
+                        },
                         () -> System.out.println("Teacher not found.")
                 );
             }
-            case 0 -> { System.out.println("Cancelled."); return; }
+            case 0 -> {
+                System.out.println("Cancelled.");
+                return;
+            }
         }
         System.out.println("Department updated successfully!");
         RegistryStorageService.saveDepartmentsSilently();
@@ -107,16 +150,25 @@ public class CRUDForDepartment {
 
     public static void deleteDepartment() {
         String facultyId = readNonEmptyString("Enter faculty ID: ");
-        Faculty faculty = CRUDForFaculty.findFacultyById(facultyId);
-        if (faculty == null) { System.out.println("No faculty found for ID: " + facultyId); return; }
+        Faculty faculty = CRUDForFaculty.findFacultyByIdOptional(facultyId).orElse(null);
+        if (faculty == null) {
+            System.out.println("No faculty found for ID: " + facultyId);
+            return;
+        }
 
         String deptId = readNonEmptyString("Enter department ID to remove: ");
-        Department toRemove = findDepartmentById(faculty.getDepartments(), deptId);
-        if (toRemove == null) { System.out.println("Error: No department found with ID " + deptId); return; }
+        Department toRemove;
+        try {
+            toRemove = requireDepartmentById(faculty.getDepartments(), deptId);
+        } catch (EntityNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
-        for (Student s : toRemove.getStudents()) s.setDepartment(null);
-        for (Teacher t : toRemove.getTeachers()) t.setDepartment(null);
+        for (Teacher teacher : toRemove.getTeachers()) teacher.setDepartment(null);
+        for (Student student : toRemove.getStudents()) student.setDepartment(null);
         faculty.getDepartments().remove(toRemove);
+        toRemove.setFaculty(null);
         System.out.println("Success: Department with ID " + deptId + " has been removed.");
         RegistryStorageService.saveDepartmentsSilently();
     }

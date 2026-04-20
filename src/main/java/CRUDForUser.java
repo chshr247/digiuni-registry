@@ -39,7 +39,7 @@ public class CRUDForUser {
 
     public static void addUser(AuthService auth) {
         String username = readNonEmptyString("Enter username: ");
-        if (auth.getUser(username) != null) {
+        if (auth.findUserOptional(username).isPresent()) {
             System.out.println("User already exists!");
             return;
         }
@@ -64,7 +64,7 @@ public class CRUDForUser {
 
     public static void updateUser(AuthService auth) {
         String username = readNonEmptyString("Enter username to update: ");
-        AuthUser user = auth.getUser(username);
+        AuthUser user = auth.findUserOptional(username).orElse(null);
         if (user == null) {
             System.out.println("User not found!");
             return;
@@ -98,7 +98,7 @@ public class CRUDForUser {
 
     public static void deleteUser(AuthService auth) {
         String username = readNonEmptyString("Enter username to delete: ");
-        if (auth.getUser(username) == null) {
+        if (auth.findUserOptional(username).isEmpty()) {
             System.out.println("User not found!");
             return;
         }

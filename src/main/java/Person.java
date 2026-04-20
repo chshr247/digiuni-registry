@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public sealed class Person permits Student, Teacher {
+public sealed class Person implements Identifiable<String> permits Student, Teacher {
     String id;
     String lastName;
     String firstName;

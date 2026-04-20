@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @ReflectiveEntity("Teacher")
-public final class Teacher extends Person {
+public final class Teacher extends Person implements Identifiable<String> {
     String post;
     String degree;
     String academicRank;

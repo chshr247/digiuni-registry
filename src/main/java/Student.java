@@ -11,7 +11,7 @@ import java.time.Period;
 @Getter
 @Setter
 @ReflectiveEntity("Student")
-public final class Student extends Person {
+public final class Student extends Person implements Identifiable<String> {
     int grade;
     int group;
     int year;

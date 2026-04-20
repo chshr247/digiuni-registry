@@ -8,7 +8,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 @ReflectiveEntity("Department")
-public class Department {
+public class Department implements Identifiable<String> {
     String id;
     String fullName;
     @lombok.ToString.Exclude

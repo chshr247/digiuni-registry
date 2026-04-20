@@ -8,7 +8,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 @ReflectiveEntity("Faculty")
-public class Faculty {
+public class Faculty implements Identifiable<String> {
     String id;
     String fullName;
     String shortName;

@@ -2,6 +2,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class AuthService {
     protected Map<String, AuthUser> users = new HashMap<>();
@@ -16,12 +17,18 @@ public class AuthService {
         users.put("manager", new AuthUser("manager", "manager", Role.MANAGER));
     }
 
+    public Optional<AuthUser> findUserOptional(String username) {
+        return Optional.ofNullable(users.get(username));
+    }
+
     public boolean login(String username, String password) {
-        AuthUser found = users.get(username);
-        if (found == null) {
+        Optional<AuthUser> foundOptional = findUserOptional(username);
+        if (foundOptional.isEmpty()) {
             System.out.println("Invalid username or password");
             return false;
         }
+
+        AuthUser found = foundOptional.get();
         if (found.getPassword().equals(password)) {
             currentUser = found;
             lastLoginAt = LocalDateTime.now();
@@ -58,7 +65,7 @@ public class AuthService {
     public void requireAuth() {
         if (!isLoggedIn()) {
             System.out.println("Access denied. Please log in first.");
-            throw new RuntimeException("Not authenticated");
+            throw new AccessDeniedException("Not authenticated");
         }
     }
 
@@ -66,7 +73,7 @@ public class AuthService {
         requireAuth();
         if (!isAdmin()) {
             System.out.println("Access denied. This action requires ADMIN role.");
-            throw new RuntimeException("Not authorized");
+            throw new AccessDeniedException("Not authorized");
         }
     }
 
@@ -74,7 +81,7 @@ public class AuthService {
         requireAuth();
         if (!isManager() && !isAdmin()) {
             System.out.println("Access denied. This action requires MANAGER or ADMIN role.");
-            throw new RuntimeException("Not authorized");
+            throw new AccessDeniedException("Not authorized");
         }
     }
 

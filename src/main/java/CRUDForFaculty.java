@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class CRUDForFaculty {
@@ -31,10 +32,17 @@ public class CRUDForFaculty {
         }
     }
 
+    public static Optional<Faculty> findFacultyByIdOptional(String id) {
+        return RepositoryRegistry.faculties().findById(id);
+    }
+
     public static Faculty findFacultyById(String id) {
-        for (Faculty f : faculties)
-            if (f.getId().equals(id)) return f;
-        return null;
+        return findFacultyByIdOptional(id).orElse(null);
+    }
+
+    public static Faculty requireFacultyById(String id) {
+        return findFacultyByIdOptional(id)
+                .orElseThrow(() -> new EntityNotFoundException("No faculty found with ID: " + id));
     }
 
     public static void create() {
@@ -46,12 +54,14 @@ public class CRUDForFaculty {
 
         Faculty f = new Faculty(id, fullName, shortName, contact);
 
-        // Призначення декана (необов'язково)
         System.out.println("Assign dean? Enter teacher ID or press Enter to skip: ");
         String deanId = scanner.nextLine().trim();
         if (!deanId.isEmpty()) {
             CRUDForTeacher.findTeacherByIdOptional(deanId).ifPresentOrElse(
-                    t -> { f.setDean(t); System.out.println("Dean set: " + t.getFullName()); },
+                    teacher -> {
+                        f.setDean(teacher);
+                        System.out.println("Dean set: " + teacher.getFullName());
+                    },
                     () -> System.out.println("Teacher not found, dean not assigned.")
             );
         }
@@ -68,8 +78,13 @@ public class CRUDForFaculty {
 
     public static void deleteFaculty() {
         String id = readNonEmptyString("Enter faculty ID to remove: ");
-        Faculty toRemove = findFacultyById(id);
-        if (toRemove == null) { System.out.println("Error: No faculty found with ID " + id); return; }
+        Faculty toRemove;
+        try {
+            toRemove = requireFacultyById(id);
+        } catch (EntityNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         for (Department d : toRemove.getDepartments()) {
             d.setFaculty(null);
@@ -87,8 +102,13 @@ public class CRUDForFaculty {
 
     public static void update() {
         String id = readNonEmptyString("Enter faculty ID for updating: ");
-        Faculty target = findFacultyById(id);
-        if (target == null) { System.out.println("No faculty found with ID: " + id); return; }
+        Faculty target;
+        try {
+            target = requireFacultyById(id);
+        } catch (EntityNotFoundException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         System.out.println("Faculty: " + target.getFullName());
         System.out.println("""
@@ -105,11 +125,17 @@ public class CRUDForFaculty {
                 System.out.print("Enter teacher ID for dean: ");
                 String deanId = scanner.nextLine().trim();
                 CRUDForTeacher.findTeacherByIdOptional(deanId).ifPresentOrElse(
-                        t -> { target.setDean(t); System.out.println("Dean set: " + t.getFullName()); },
+                        teacher -> {
+                            target.setDean(teacher);
+                            System.out.println("Dean set: " + teacher.getFullName());
+                        },
                         () -> System.out.println("Teacher not found.")
                 );
             }
-            case 0 -> { System.out.println("Cancelled."); return; }
+            case 0 -> {
+                System.out.println("Cancelled.");
+                return;
+            }
         }
         System.out.println("Faculty updated successfully!");
         RegistryStorageService.saveFacultiesSilently();
