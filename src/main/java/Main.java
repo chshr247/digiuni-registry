@@ -3,6 +3,13 @@ public class Main {
         AuthService auth = new AuthService();
         RegistryStorageService.setAuthService(auth);
         RegistryStorageService.loadOnStartup();
+
+        UniversityServer server = new UniversityServer();
+        Thread serverThread = new Thread(server);
+        serverThread.setDaemon(true);
+        serverThread.start();
+        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+        UniversityClient.printInfo();
         System.out.println("""
                 admin admin
                 user user
@@ -27,6 +34,7 @@ public class Main {
                     2. Show all entities
                     7. Save / Load data (CSV)
                     8. Reflection and annotations
+                    9. Open web interface (browser)
                    --- MANAGER ONLY ---
                     3. Add entity
                     4. Update entity
@@ -35,7 +43,7 @@ public class Main {
                     6. Manage users
                    """);
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 8);
+            int choice = CRUD.intInRange("Your choice: ", 0, 9);
 
             try {
                 switch (choice) {
@@ -47,6 +55,7 @@ public class Main {
                     case 6 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
                     case 7 -> { auth.requireAuth(); RegistryStorageService.showStorageMenu();}
                     case 8 -> { auth.requireAuth(); ReflectionModule.showReflectionMenu(); }
+                    case 9 -> { auth.requireAuth(); UniversityClient.printInfo(); }
                     case 0 -> { auth.logout(); running = false; }
                 }
                 Thread.sleep(2000);
