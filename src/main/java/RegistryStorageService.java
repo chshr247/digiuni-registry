@@ -61,15 +61,21 @@ public class RegistryStorageService {
         while (running) {
             System.out.println("""
                     
-                    --- SAVE / LOAD DATA (NIO.2 + CSV) ---
-                    1. Save all data
-                    2. Load all data
+                    --- SAVE / LOAD DATA ---
+                    -- CSV (NIO.2) --
+                    1. Save all data (CSV)
+                    2. Load all data (CSV)
+                    -- JSON (Jackson) --
+                    3. Export to JSON
+                    4. Import from JSON
                     0. Back
                     """);
-            int choice = CRUD.intInRange("Your choice: ", 0, 2);
+            int choice = CRUD.intInRange("Your choice: ", 0, 4);
             switch (choice) {
                 case 1 -> saveAll();
                 case 2 -> loadAll();
+                case 3 -> JsonStorageService.exportToJson();
+                case 4 -> JsonStorageService.importFromJson();
                 case 0 -> running = false;
             }
         }
