@@ -1,6 +1,10 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Scanner;
 
 public class CRUDForUser {
+    private static final Logger log = LoggerFactory.getLogger(CRUDForUser.class);
+
     static Scanner scanner = new Scanner(System.in);
 
     private static String readNonEmptyString(String message) {
@@ -59,6 +63,7 @@ public class CRUDForUser {
         AuthUser newUser = new AuthUser(username, password, role);
         auth.addUser(newUser);
         System.out.println("User added successfully!");
+        log.info("USER CREATED username={} role={}", username, role);
         RegistryStorageService.saveUsersSilently();
     }
 
@@ -77,6 +82,7 @@ public class CRUDForUser {
             String newPass = readNonEmptyString("Enter new password: ");
             user.setPassword(newPass);
             System.out.println("Password updated!");
+            log.info("USER PASSWORD CHANGED username={}", username);
             RegistryStorageService.saveUsersSilently();
         } else {
             System.out.println("Choose new role:");
@@ -92,6 +98,7 @@ public class CRUDForUser {
             };
             user.setRole(newRole);
             System.out.println("Role updated!");
+            log.info("USER ROLE CHANGED username={} newRole={}", username, newRole);
             RegistryStorageService.saveUsersSilently();
         }
     }
@@ -104,6 +111,7 @@ public class CRUDForUser {
         }
         auth.removeUser(username);
         System.out.println("User deleted!");
+        log.info("USER DELETED username={}", username);
         RegistryStorageService.saveUsersSilently();
     }
 }

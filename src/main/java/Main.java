@@ -1,7 +1,11 @@
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         AuthService auth = new AuthService();
         RegistryStorageService.setAuthService(auth);
+        if (!RegistryStorageService.acquireLock()) {
+            System.out.println("Exiting to prevent data corruption.");
+            return;
+        }
         RegistryStorageService.loadOnStartup();
 
         UniversityServer server = new UniversityServer();
@@ -9,7 +13,6 @@ public class Main {
         serverThread.setDaemon(true);
         serverThread.start();
         try { Thread.sleep(200); } catch (InterruptedException ignored) {}
-        UniversityClient.printInfo();
         System.out.println("""
                 admin admin
                 user user
@@ -31,35 +34,28 @@ public class Main {
                    --- MAIN MENU ---
                     0. Logout and exit
                     1. Search and reports
-                    2. Show all entities
-                    7. Save / Load data (CSV)
-                    8. Reflection and annotations
-                    9. Open web interface (browser)
                    --- MANAGER ONLY ---
-                    3. Add entity
-                    4. Update entity
+                    2. Add entity
+                    3. Update entity
                    --- ADMIN ONLY ---
-                    5. Delete entity
-                    6. Manage users
+                    4. Delete entity
+                    5. Manage users
                    """);
 
-            int choice = CRUD.intInRange("Your choice: ", 0, 9);
+            int choice = CRUD.intInRange("Your choice: ", 0, 5);
 
             try {
                 switch (choice) {
                     case 1 -> { auth.requireAuth(); showSearchMenu(auth); }
-                    case 2 -> { auth.requireAuth(); showShowMenu(auth); }
-                    case 3 -> { auth.requireManager(); showAddMenu(auth); }
-                    case 4 -> { auth.requireManager(); showUpdateMenu(auth); }
-                    case 5 -> { auth.requireAdmin(); showDeleteMenu(auth); }
-                    case 6 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
-                    case 7 -> { auth.requireAuth(); RegistryStorageService.showStorageMenu();}
-                    case 8 -> { auth.requireAuth(); ReflectionModule.showReflectionMenu(); }
-                    case 9 -> { auth.requireAuth(); UniversityClient.printInfo(); }
+                    case 2 -> { auth.requireManager(); showAddMenu(auth); }
+                    case 3 -> { auth.requireManager(); showUpdateMenu(auth); }
+                    case 4 -> { auth.requireAdmin(); showDeleteMenu(auth); }
+                    case 5 -> { auth.requireAdmin(); showUserManagementMenu(auth); }
                     case 0 -> { auth.logout(); running = false; }
                 }
-                Thread.sleep(2000);
             } catch (RuntimeException e) {
+                System.err.println("Operation failed: " + e.getMessage());
+                e.printStackTrace(System.err);
             }
         }
 
@@ -143,19 +139,27 @@ public class Main {
     }
 
     private static void showUserManagementMenu(AuthService auth) {
-        System.out.println("\n--- USER MANAGEMENT ---");
+        System.out.println("\n--- ADMIN PANEL ---");
+        System.out.println("-- Users --");
         System.out.println("1. View all users");
         System.out.println("2. Add user");
         System.out.println("3. Update user");
         System.out.println("4. Delete user");
+        System.out.println("-- System --");
+        System.out.println("5. Show all entities");
+        System.out.println("6. Save / Load data (CSV)");
+        System.out.println("7. Reflection and annotations");
         System.out.println("0. Back");
 
-        int choice = CRUD.intInRange("Your choice: ", 0, 4);
+        int choice = CRUD.intInRange("Your choice: ", 0, 7);
         switch (choice) {
             case 1 -> CRUDForUser.showUsers(auth);
             case 2 -> CRUDForUser.addUser(auth);
             case 3 -> CRUDForUser.updateUser(auth);
             case 4 -> CRUDForUser.deleteUser(auth);
+            case 5 -> showShowMenu(auth);
+            case 6 -> RegistryStorageService.showStorageMenu();
+            case 7 -> ReflectionModule.showReflectionMenu();
             case 0 -> {}
         }
     }

@@ -1,3 +1,5 @@
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,7 +15,9 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
+@Slf4j
 public class RegistryStorageService {
+
 
     private static final Path DATA_DIR = Path.of("data");
     private static final Path UNIVERSITY_FILE = DATA_DIR.resolve("university.csv");
@@ -25,8 +29,31 @@ public class RegistryStorageService {
 
     private static AuthService authService;
 
+    private static final Path LOCK_FILE = DATA_DIR.resolve(".lock");
+
     public static void setAuthService(AuthService auth) {
         authService = auth;
+    }
+
+    public static boolean acquireLock() {
+        try {
+            Files.createDirectories(DATA_DIR);
+            if (Files.exists(LOCK_FILE)) {
+                System.out.println("[Warning] Another instance may be running (lock file exists).");
+                System.out.println("  If no other instance is running, delete: " + LOCK_FILE.toAbsolutePath());
+                return false;
+            }
+            Files.writeString(LOCK_FILE, String.valueOf(ProcessHandle.current().pid()),
+                    StandardOpenOption.CREATE_NEW);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try { Files.deleteIfExists(LOCK_FILE); } catch (IOException ignored) {}
+            }));
+            return true;
+        } catch (IOException e) {
+            System.out.println("[Lock error] " + e.getMessage());
+            log.error("LOCK ERROR: {}", e.getMessage());
+            return false;
+        }
     }
 
     public static void showStorageMenu() {
@@ -58,8 +85,10 @@ public class RegistryStorageService {
             saveTeachers();
             saveUsers();
             System.out.println("Data saved successfully.");
+            log.info("DATA SAVED all files");
         } catch (IOException e) {
             System.out.println("Error while saving data: " + e.getMessage());
+            log.error("SAVE ERROR: {}", e.getMessage());
         }
     }
 
@@ -102,6 +131,7 @@ public class RegistryStorageService {
             action.run();
         } catch (IOException e) {
             System.out.println("[Auto-save error] " + e.getMessage());
+            log.error("AUTO-SAVE ERROR: {}", e.getMessage());
         }
     }
 
@@ -110,6 +140,7 @@ public class RegistryStorageService {
             if (!hasSavedFiles()) { System.out.println("No saved files found."); return; }
             clearAndLoad();
             System.out.println("Data loaded successfully.");
+            log.info("DATA LOADED successfully");
         } catch (IOException e) {
             System.out.println("Error while loading data: " + e.getMessage());
         }
@@ -126,6 +157,7 @@ public class RegistryStorageService {
                     + CRUD.students.size() + " students.");
         } catch (Exception e) {
             System.out.println("[Startup load error] " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            log.error("STARTUP LOAD ERROR {}: {}", e.getClass().getSimpleName(), e.getMessage());
             e.printStackTrace();
         }
     }
@@ -263,23 +295,33 @@ public class RegistryStorageService {
 
     private static void loadStudents(Map<String, Department> departmentsById) throws IOException {
         for (String line : readDataLines(STUDENTS_FILE)) {
-            String[] p = splitLine(line, 13);
-            Student s = new Student(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
-                    parseInt(p[7]), parseInt(p[8]), parseInt(p[9]), p[10], p[11]);
-            CRUD.students.add(s);
-            Department d = departmentsById.get(p[12]);
-            if (d != null) d.addStudent(s);
+            try {
+                String[] p = splitLine(line, 13);
+                Student s = new Student(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
+                        parseInt(p[7]), parseInt(p[8]), parseInt(p[9]), p[10], p[11]);
+                CRUD.students.add(s);
+                Department d = departmentsById.get(p[12]);
+                if (d != null) d.addStudent(s);
+            } catch (Exception e) {
+                System.out.println("[Load warning] Skipped invalid student row: " + e.getMessage());
+                log.warn("LOAD SKIP invalid student row: {}", e.getMessage());
+            }
         }
     }
 
     private static void loadTeachers(Map<String, Department> departmentsById) throws IOException {
         for (String line : readDataLines(TEACHERS_FILE)) {
-            String[] p = splitLine(line, 13);
-            Teacher t = new Teacher(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
-                    p[7], p[8], p[9], parseDate(p[10]), parseInt(p[11]));
-            CRUDForTeacher.teachers.add(t);
-            Department d = departmentsById.get(p[12]);
-            if (d != null) d.addTeacher(t);
+            try {
+                String[] p = splitLine(line, 13);
+                Teacher t = new Teacher(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
+                        p[7], p[8], p[9], parseDate(p[10]), parseInt(p[11]));
+                CRUDForTeacher.teachers.add(t);
+                Department d = departmentsById.get(p[12]);
+                if (d != null) d.addTeacher(t);
+            } catch (Exception e) {
+                System.out.println("[Load warning] Skipped invalid teacher row: " + e.getMessage());
+                log.warn("LOAD SKIP invalid teacher row: {}", e.getMessage());
+            }
         }
     }
 

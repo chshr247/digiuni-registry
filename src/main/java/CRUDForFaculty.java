@@ -1,8 +1,12 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
 
 public class CRUDForFaculty {
+    private static final Logger log = LoggerFactory.getLogger(CRUDForFaculty.class);
+
     static Scanner scanner = new Scanner(System.in);
     static ArrayList<Faculty> faculties = new ArrayList<>();
     public static int counterOfFaculty = 0;
@@ -68,6 +72,7 @@ public class CRUDForFaculty {
 
         faculties.add(f);
         System.out.println("Faculty registered successfully!");
+        log.info("FACULTY CREATED id={} name={}", f.getId(), f.getFullName());
         RegistryStorageService.saveFacultiesSilently();
     }
 
@@ -97,6 +102,7 @@ public class CRUDForFaculty {
         }
         faculties.remove(toRemove);
         System.out.println("Success: Faculty with ID " + id + " has been removed.");
+        log.info("FACULTY DELETED id={}", id);
         RegistryStorageService.saveFacultiesSilently();
     }
 
@@ -138,6 +144,7 @@ public class CRUDForFaculty {
             }
         }
         System.out.println("Faculty updated successfully!");
+        log.info("FACULTY UPDATED id={} name={}", target.getId(), target.getFullName());
         RegistryStorageService.saveFacultiesSilently();
     }
 }

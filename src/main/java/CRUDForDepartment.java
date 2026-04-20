@@ -1,8 +1,12 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
 
 public class CRUDForDepartment {
+    private static final Logger log = LoggerFactory.getLogger(CRUDForDepartment.class);
+
     static Scanner scanner = new Scanner(System.in);
     public static int counterOfDepartments = 0;
 
@@ -83,6 +87,7 @@ public class CRUDForDepartment {
         }
 
         System.out.println("Department added successfully to faculty: " + faculty.getFullName());
+        log.info("DEPARTMENT CREATED id={} name={} faculty={}", d.getId(), d.getFullName(), faculty.getFullName());
         RegistryStorageService.saveDepartmentsSilently();
     }
 
@@ -145,6 +150,7 @@ public class CRUDForDepartment {
             }
         }
         System.out.println("Department updated successfully!");
+        log.info("DEPARTMENT UPDATED id={} name={}", target.getId(), target.getFullName());
         RegistryStorageService.saveDepartmentsSilently();
     }
 
@@ -170,6 +176,7 @@ public class CRUDForDepartment {
         faculty.getDepartments().remove(toRemove);
         toRemove.setFaculty(null);
         System.out.println("Success: Department with ID " + deptId + " has been removed.");
+        log.info("DEPARTMENT DELETED id={}", deptId);
         RegistryStorageService.saveDepartmentsSilently();
     }
 }

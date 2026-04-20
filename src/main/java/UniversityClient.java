@@ -5,16 +5,6 @@ public class UniversityClient {
 
     private static final String BASE_URL = "http://localhost:" + UniversityServer.PORT;
 
-    public static void printInfo() {
-        System.out.println("University HTTP server is running.");
-        System.out.println("Open in browser:");
-        System.out.println("  " + BASE_URL + "/            - home (stats)");
-        System.out.println("  " + BASE_URL + "/students    - all students");
-        System.out.println("  " + BASE_URL + "/teachers    - all teachers");
-        System.out.println("  " + BASE_URL + "/faculties   - all faculties");
-        System.out.println("  " + BASE_URL + "/departments - all departments");
-    }
-
     public static String get(String path) {
         try {
             URL url = new URI(BASE_URL + path).toURL();
