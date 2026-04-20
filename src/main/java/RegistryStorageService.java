@@ -25,8 +25,30 @@ public class RegistryStorageService {
 
     private static AuthService authService;
 
+    private static final Path LOCK_FILE = DATA_DIR.resolve(".lock");
+
     public static void setAuthService(AuthService auth) {
         authService = auth;
+    }
+
+    public static boolean acquireLock() {
+        try {
+            Files.createDirectories(DATA_DIR);
+            if (Files.exists(LOCK_FILE)) {
+                System.out.println("[Warning] Another instance may be running (lock file exists).");
+                System.out.println("  If no other instance is running, delete: " + LOCK_FILE.toAbsolutePath());
+                return false;
+            }
+            Files.writeString(LOCK_FILE, String.valueOf(ProcessHandle.current().pid()),
+                    StandardOpenOption.CREATE_NEW);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try { Files.deleteIfExists(LOCK_FILE); } catch (IOException ignored) {}
+            }));
+            return true;
+        } catch (IOException e) {
+            System.out.println("[Lock error] " + e.getMessage());
+            return false;
+        }
     }
 
     public static void showStorageMenu() {
@@ -263,23 +285,31 @@ public class RegistryStorageService {
 
     private static void loadStudents(Map<String, Department> departmentsById) throws IOException {
         for (String line : readDataLines(STUDENTS_FILE)) {
-            String[] p = splitLine(line, 13);
-            Student s = new Student(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
-                    parseInt(p[7]), parseInt(p[8]), parseInt(p[9]), p[10], p[11]);
-            CRUD.students.add(s);
-            Department d = departmentsById.get(p[12]);
-            if (d != null) d.addStudent(s);
+            try {
+                String[] p = splitLine(line, 13);
+                Student s = new Student(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
+                        parseInt(p[7]), parseInt(p[8]), parseInt(p[9]), p[10], p[11]);
+                CRUD.students.add(s);
+                Department d = departmentsById.get(p[12]);
+                if (d != null) d.addStudent(s);
+            } catch (Exception e) {
+                System.out.println("[Load warning] Skipped invalid student row: " + e.getMessage());
+            }
         }
     }
 
     private static void loadTeachers(Map<String, Department> departmentsById) throws IOException {
         for (String line : readDataLines(TEACHERS_FILE)) {
-            String[] p = splitLine(line, 13);
-            Teacher t = new Teacher(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
-                    p[7], p[8], p[9], parseDate(p[10]), parseInt(p[11]));
-            CRUDForTeacher.teachers.add(t);
-            Department d = departmentsById.get(p[12]);
-            if (d != null) d.addTeacher(t);
+            try {
+                String[] p = splitLine(line, 13);
+                Teacher t = new Teacher(p[0], p[1], p[2], p[3], parseDate(p[4]), p[5], stripPhone(p[6]),
+                        p[7], p[8], p[9], parseDate(p[10]), parseInt(p[11]));
+                CRUDForTeacher.teachers.add(t);
+                Department d = departmentsById.get(p[12]);
+                if (d != null) d.addTeacher(t);
+            } catch (Exception e) {
+                System.out.println("[Load warning] Skipped invalid teacher row: " + e.getMessage());
+            }
         }
     }
 

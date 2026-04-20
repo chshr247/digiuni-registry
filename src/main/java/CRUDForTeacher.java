@@ -145,8 +145,23 @@ public class CRUDForTeacher {
         if (toRemove != null) {
             teachers.remove(toRemove);
             if (toRemove.getDepartment() != null) toRemove.getDepartment().removeTeacher(toRemove);
+            for (Faculty f : CRUDForFaculty.faculties) {
+                if (toRemove.equals(f.getDean())) {
+                    f.setDean(null);
+                    System.out.println("  [Dean unassigned from faculty: " + f.getFullName() + "]");
+                }
+                for (Depif (f.getDepartments() != null) {
+                    for (Department d : f.getDepartments()) {
+                        if (toRemove.equals(d.getHead())) {
+                            d.setHead(null);
+                            System.out.println("  [Head unassigned from department: " + d.getFullName() + "]");
+                        }
+                    }
+                }
+            }
             System.out.println("Success: Teacher with ID " + id + " has been removed.");
             RegistryStorageService.saveTeachersSilently();
+            RegistryStorageService.saveFacultiesSilently();
         } else {
             System.out.println("Error: No teacher found with ID " + id);
         }

@@ -57,6 +57,7 @@ public class StreamReports {
 
     private static void searchStudentByName() {
         String query = prompt("Enter full name (or part): ").toLowerCase();
+        if (query.isEmpty()) { System.out.println("Search query cannot be empty."); return; }
         List<Student> found = studentStream()
                 .filter(s -> s.getFullName().toLowerCase().contains(query))
                 .sorted(Comparator.comparing(Student::getLastName))
@@ -84,6 +85,7 @@ public class StreamReports {
 
     private static void searchTeacherByName() {
         String query = prompt("Enter teacher name (or part): ").toLowerCase();
+        if (query.isEmpty()) { System.out.println("Search query cannot be empty."); return; }
         List<Teacher> found = CRUDForTeacher.teachers.stream()
                 .filter(t -> t.getFullName().toLowerCase().contains(query))
                 .sorted(Comparator.comparing(Teacher::getLastName))
