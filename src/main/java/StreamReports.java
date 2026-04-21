@@ -57,11 +57,16 @@ public class StreamReports {
 
     private static void searchStudentByName() {
         String query = prompt("Enter full name (or part): ").toLowerCase();
-        if (query.isEmpty()) { System.out.println("Search query cannot be empty."); return; }
+        if (query.isEmpty()) {
+            System.out.println("Search query cannot be empty.");
+            return;
+        }
+
         List<Student> found = studentStream()
                 .filter(s -> s.getFullName().toLowerCase().contains(query))
                 .sorted(Comparator.comparing(Student::getLastName))
                 .toList();
+
         printStudents("Search results", found);
     }
 
@@ -71,6 +76,7 @@ public class StreamReports {
                 .filter(s -> s.getGrade() == grade)
                 .sorted(Comparator.comparing(Student::getLastName))
                 .toList();
+
         printStudents("Students of grade " + grade, found);
     }
 
@@ -80,16 +86,22 @@ public class StreamReports {
                 .filter(s -> s.getGroup() == group)
                 .sorted(Comparator.comparing(Student::getLastName))
                 .toList();
+
         printStudents("Students of group " + group, found);
     }
 
     private static void searchTeacherByName() {
         String query = prompt("Enter teacher name (or part): ").toLowerCase();
-        if (query.isEmpty()) { System.out.println("Search query cannot be empty."); return; }
+        if (query.isEmpty()) {
+            System.out.println("Search query cannot be empty.");
+            return;
+        }
+
         List<Teacher> found = CRUDForTeacher.teachers.stream()
                 .filter(t -> t.getFullName().toLowerCase().contains(query))
                 .sorted(Comparator.comparing(Teacher::getLastName))
                 .toList();
+
         printTeachers("Search results", found);
     }
 
@@ -105,29 +117,39 @@ public class StreamReports {
                                         .toList()
                         )
                 ));
-        if (byGrade.isEmpty()) { System.out.println("No students found."); return; }
+
+        if (byGrade.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
+
         System.out.println("\n=== All students by grade ===");
         byGrade.forEach((grade, students) -> {
             System.out.println("\n-- Grade " + grade + " (" + students.size() + " students) --");
-            students.forEach(s -> System.out.println("  " + formatStudent(s)));
+            students.stream()
+                    .map(StudentView::from)
+                    .forEach(v -> System.out.println("  " + v.toDisplayString()));
         });
     }
 
     private static void showStudentsOfFacultyAlpha() {
         Faculty faculty = chooseFaculty();
         if (faculty == null) return;
+
         List<Student> students = faculty.getDepartments().stream()
                 .filter(Objects::nonNull)
                 .flatMap(d -> d.getStudents().stream())
                 .sorted(Comparator.comparing(Student::getLastName)
                         .thenComparing(Student::getFirstName))
                 .toList();
+
         printStudents("Students of faculty '" + faculty.getFullName() + "' (alphabetically)", students);
     }
 
     private static void showStudentsOfDepartmentByGrade() {
         Department dept = chooseDepartment();
         if (dept == null) return;
+
         Map<Integer, List<Student>> byGrade = dept.getStudents().stream()
                 .collect(Collectors.groupingBy(
                         Student::getGrade,
@@ -139,70 +161,97 @@ public class StreamReports {
                                         .toList()
                         )
                 ));
-        if (byGrade.isEmpty()) { System.out.println("No students in this department."); return; }
+
+        if (byGrade.isEmpty()) {
+            System.out.println("No students in this department.");
+            return;
+        }
+
         System.out.println("\n=== Students of '" + dept.getFullName() + "' by grade ===");
         byGrade.forEach((grade, students) -> {
             System.out.println("\n-- Grade " + grade + " (" + students.size() + " students) --");
-            students.forEach(s -> System.out.println("  " + formatStudent(s)));
+            students.stream()
+                    .map(StudentView::from)
+                    .forEach(v -> System.out.println("  " + v.toDisplayString()));
         });
     }
 
     private static void showStudentsOfDepartmentAlpha() {
         Department dept = chooseDepartment();
         if (dept == null) return;
+
         List<Student> students = dept.getStudents().stream()
                 .sorted(Comparator.comparing(Student::getLastName)
                         .thenComparing(Student::getFirstName))
                 .toList();
+
         printStudents("Students of '" + dept.getFullName() + "' (alphabetically)", students);
     }
 
     private static void showStudentsOfDepartmentBySpecificGrade() {
         Department dept = chooseDepartment();
         if (dept == null) return;
+
         int grade = CRUD.intInRange("Enter grade (1-6): ", 1, 6);
         List<Student> students = dept.getStudents().stream()
                 .filter(s -> s.getGrade() == grade)
                 .sorted(Comparator.comparing(Student::getLastName))
                 .toList();
+
         System.out.println("\n=== Department '" + dept.getFullName() + "', grade " + grade + " ===");
         System.out.println("-- List --");
-        if (students.isEmpty()) System.out.println("  No students.");
-        else students.forEach(s -> System.out.println("  " + formatStudent(s)));
+        if (students.isEmpty()) {
+            System.out.println("  No students.");
+        } else {
+            students.stream()
+                    .map(StudentView::from)
+                    .forEach(v -> System.out.println("  " + v.toDisplayString()));
+        }
+
         System.out.println("\n-- Alphabetically --");
         students.stream()
                 .sorted(Comparator.comparing(Student::getLastName)
                         .thenComparing(Student::getFirstName)
                         .thenComparing(Student::getPatronymic))
-                .forEach(s -> System.out.println("  " + formatStudent(s)));
+                .map(StudentView::from)
+                .forEach(v -> System.out.println("  " + v.toDisplayString()));
     }
 
     private static void showTeachersOfFacultyAlpha() {
         Faculty faculty = chooseFaculty();
         if (faculty == null) return;
+
         List<Teacher> teachers = faculty.getDepartments().stream()
                 .filter(Objects::nonNull)
                 .flatMap(d -> d.getTeachers().stream())
                 .sorted(Comparator.comparing(Teacher::getLastName)
                         .thenComparing(Teacher::getFirstName))
                 .toList();
+
         printTeachers("Teachers of faculty '" + faculty.getFullName() + "' (alphabetically)", teachers);
     }
 
     private static void showTeachersOfDepartmentAlpha() {
         Department dept = chooseDepartment();
         if (dept == null) return;
+
         List<Teacher> teachers = dept.getTeachers().stream()
                 .sorted(Comparator.comparing(Teacher::getLastName)
                         .thenComparing(Teacher::getFirstName))
                 .toList();
+
         printTeachers("Teachers of '" + dept.getFullName() + "' (alphabetically)", teachers);
     }
 
     private static void showStudentCountByGrade() {
         Map<Integer, Long> stats = studentStream()
                 .collect(Collectors.groupingBy(Student::getGrade, TreeMap::new, Collectors.counting()));
-        if (stats.isEmpty()) { System.out.println("No students found."); return; }
+
+        if (stats.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
+
         System.out.println("\nStudents by grade:");
         stats.forEach((grade, count) -> System.out.println("  Grade " + grade + ": " + count));
     }
@@ -211,8 +260,15 @@ public class StreamReports {
         Map<String, Long> stats = studentStream()
                 .collect(Collectors.groupingBy(
                         s -> safeText(s.getFormOfStudy(), "Unknown"),
-                        TreeMap::new, Collectors.counting()));
-        if (stats.isEmpty()) { System.out.println("No students found."); return; }
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+
+        if (stats.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
+
         System.out.println("\nStudents by form of study:");
         stats.forEach((form, count) -> System.out.println("  " + form + ": " + count));
     }
@@ -221,8 +277,15 @@ public class StreamReports {
         Map<String, Long> stats = CRUDForTeacher.teachers.stream()
                 .collect(Collectors.groupingBy(
                         t -> deptName(t.getDepartment()),
-                        TreeMap::new, Collectors.counting()));
-        if (stats.isEmpty()) { System.out.println("No teachers found."); return; }
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+
+        if (stats.isEmpty()) {
+            System.out.println("No teachers found.");
+            return;
+        }
+
         System.out.println("\nTeachers by department:");
         stats.forEach((dept, count) -> System.out.println("  " + dept + ": " + count));
     }
@@ -231,8 +294,15 @@ public class StreamReports {
         Map<String, Double> stats = CRUDForTeacher.teachers.stream()
                 .collect(Collectors.groupingBy(
                         t -> deptName(t.getDepartment()),
-                        TreeMap::new, Collectors.averagingInt(Teacher::getRate)));
-        if (stats.isEmpty()) { System.out.println("No teachers found."); return; }
+                        TreeMap::new,
+                        Collectors.averagingInt(Teacher::getRate)
+                ));
+
+        if (stats.isEmpty()) {
+            System.out.println("No teachers found.");
+            return;
+        }
+
         System.out.println("\nAverage teacher rate by department:");
         stats.forEach((dept, avg) -> System.out.printf("  %s: %.2f%n", dept, avg));
     }
@@ -245,8 +315,14 @@ public class StreamReports {
                 .collect(Collectors.toMap(
                         d -> safeText(d.getFullName(), "Unknown"),
                         d -> d.getStudents() == null ? 0 : d.getStudents().size(),
-                        Integer::sum));
-        if (stats.isEmpty()) { System.out.println("No departments found."); return; }
+                        Integer::sum
+                ));
+
+        if (stats.isEmpty()) {
+            System.out.println("No departments found.");
+            return;
+        }
+
         System.out.println("\nTop departments by student count:");
         stats.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
@@ -261,9 +337,14 @@ public class StreamReports {
     }
 
     private static Faculty chooseFaculty() {
-        if (CRUDForFaculty.faculties.isEmpty()) { System.out.println("No faculties found."); return null; }
+        if (CRUDForFaculty.faculties.isEmpty()) {
+            System.out.println("No faculties found.");
+            return null;
+        }
+
         System.out.println("Available faculties:");
         CRUDForFaculty.faculties.forEach(f -> System.out.println("  " + f.getId() + " - " + f.getFullName()));
+
         String id = prompt("Enter faculty ID: ");
         Faculty f = CRUDForFaculty.findFacultyById(id);
         if (f == null) System.out.println("Faculty not found.");
@@ -273,9 +354,15 @@ public class StreamReports {
     private static Department chooseDepartment() {
         Faculty faculty = chooseFaculty();
         if (faculty == null) return null;
-        if (faculty.getDepartments().isEmpty()) { System.out.println("No departments in this faculty."); return null; }
+
+        if (faculty.getDepartments().isEmpty()) {
+            System.out.println("No departments in this faculty.");
+            return null;
+        }
+
         System.out.println("Departments of '" + faculty.getFullName() + "':");
         faculty.getDepartments().forEach(d -> System.out.println("  " + d.getId() + " - " + d.getFullName()));
+
         String id = prompt("Enter department ID: ");
         Department d = CRUDForDepartment.findDepartmentById(faculty.getDepartments(), id);
         if (d == null) System.out.println("Department not found.");
@@ -284,21 +371,27 @@ public class StreamReports {
 
     private static void printStudents(String title, List<Student> list) {
         System.out.println("\n=== " + title + " ===");
-        if (list.isEmpty()) { System.out.println("  No students found."); return; }
-        list.forEach(s -> System.out.println("  " + formatStudent(s)));
+        if (list.isEmpty()) {
+            System.out.println("  No students found.");
+            return;
+        }
+
+        list.stream()
+                .map(StudentView::from)
+                .forEach(v -> System.out.println("  " + v.toDisplayString()));
+
         System.out.println("  Total: " + list.size());
     }
 
     private static void printTeachers(String title, List<Teacher> list) {
         System.out.println("\n=== " + title + " ===");
-        if (list.isEmpty()) { System.out.println("  No teachers found."); return; }
+        if (list.isEmpty()) {
+            System.out.println("  No teachers found.");
+            return;
+        }
+
         list.forEach(t -> System.out.println("  " + formatTeacher(t)));
         System.out.println("  Total: " + list.size());
-    }
-
-    private static String formatStudent(Student s) {
-        return String.format("%-30s | grade %d, group %d | %s | %s",
-                s.getFullName(), s.getGrade(), s.getGroup(), s.getFormOfStudy(), s.getStatus());
     }
 
     private static String formatTeacher(Teacher t) {
