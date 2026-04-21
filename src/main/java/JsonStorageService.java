@@ -7,25 +7,29 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.regex.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class JsonStorageService {
 
     private static final Logger log = LoggerFactory.getLogger(JsonStorageService.class);
-    private static final Path JSON_FILE = Path.of("data", "backup.json");
+    private static final Path JSON_DIR = Path.of("data");
+    private static final Path JSON_FILE = JSON_DIR.resolve("backup.json");
+    private static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
     private static final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .enable(SerializationFeature.INDENT_OUTPUT)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    // ── DTO records (read-only snapshot) ─────────────────────────────────────
 
     public record UniversitySnapshot(String fullName, String shortName, String city, String address) {}
 
@@ -55,10 +59,12 @@ public class JsonStorageService {
         private List<TeacherSnapshot> teachers;
     }
 
+    // ── Export to JSON ────────────────────────────────────────────────────────
 
     public static void exportToJson() {
         try {
-            Files.createDirectories(JSON_FILE.getParent());
+            Files.createDirectories(JSON_DIR);
+            Path timestamped = JSON_DIR.resolve("backup_" + LocalDateTime.now().format(TS) + ".json");
 
             University uni = extractUniversity();
             UniversitySnapshot uniSnap = uni == null ? null
@@ -98,18 +104,22 @@ public class JsonStorageService {
                     .toList();
 
             DatabaseSnapshot snapshot = new DatabaseSnapshot(uniSnap, facSnaps, deptSnaps, stuSnaps, tchSnaps);
+            // Пишемо з timestamp (архів) і оновлюємо backup.json (остання версія)
+            mapper.writeValue(timestamped.toFile(), snapshot);
             mapper.writeValue(JSON_FILE.toFile(), snapshot);
 
-            System.out.println("JSON exported: " + JSON_FILE.toAbsolutePath());
+            System.out.println("JSON exported: " + timestamped.getFileName());
             System.out.println("  Faculties: " + facSnaps.size() + ", Departments: " + deptSnaps.size()
                     + ", Students: " + stuSnaps.size() + ", Teachers: " + tchSnaps.size());
-            log.info("JSON EXPORT success path={}", JSON_FILE);
+            log.info("JSON EXPORT success path={}", timestamped);
 
         } catch (IOException e) {
             System.out.println("JSON export error: " + e.getMessage());
             log.error("JSON EXPORT ERROR: {}", e.getMessage());
         }
     }
+
+    // ── Import from JSON ──────────────────────────────────────────────────────
 
     public static void importFromJson() {
         if (!Files.exists(JSON_FILE)) {
@@ -189,6 +199,7 @@ public class JsonStorageService {
         }
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static University extractUniversity() {
         return CRUDForFaculty.faculties.stream()

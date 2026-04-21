@@ -86,12 +86,12 @@ public class CRUDForTeacher {
 
         counterOfTeachers++;
         String id = String.valueOf(counterOfTeachers);
-        String lastName = readNonEmptyString("Enter Last Name: ");
-        String firstName = readNonEmptyString("Enter First Name: ");
-        String patronymic = readNonEmptyString("Enter Patronymic: ");
+        String lastName = CRUD.readName("Enter Last Name: ");
+        String firstName = CRUD.readName("Enter First Name: ");
+        String patronymic = CRUD.readName("Enter Patronymic: ");
         LocalDate birthDate = readDate("Enter Birth Date");
-        String email = readNonEmptyString("Enter Email: ");
-        String phone = readNonEmptyString("Enter Phone Number: ");
+        String email = CRUD.readEmail("Enter Email: ");
+        String phone = CRUD.readPhone("Enter Phone Number: ");
         String post = readNonEmptyString("Enter Post: ");
         String degree = readNonEmptyString("Enter Degree: ");
         String rank = readNonEmptyString("Enter Academic Rank: ");

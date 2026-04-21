@@ -27,6 +27,37 @@ public class CRUD {
         return input;
     }
 
+    static String readEmail(String message) {
+        while (true) {
+            System.out.print(message);
+            String val = scanner.nextLine().trim();
+            if (val.matches("^[\\w.+-]+@[\\w-]+\\.[\\w.]{2,}$")) return val;
+            System.out.println("Error: invalid email format (e.g. name@domain.com)");
+        }
+    }
+
+    static String readPhone(String message) {
+        while (true) {
+            System.out.print(message);
+            String val = scanner.nextLine().trim();
+            if (val.matches("^\\+?[0-9]{7,15}$")) return val;
+            System.out.println("Error: invalid phone format (e.g. +380671234567)");
+        }
+    }
+
+    static String readName(String message) {
+        while (true) {
+            System.out.print(message);
+            String val = scanner.nextLine().trim();
+            if (val.isEmpty()) { System.out.println("Error: field cannot be empty."); continue; }
+            if (!val.matches("[\\p{L}\\s'-]+")) {
+                System.out.println("Error: name must contain only letters, spaces, apostrophes or hyphens.");
+                continue;
+            }
+            return val;
+        }
+    }
+
     static int intInRange(String message, int min, int max) {
         int value;
         while (true) {
@@ -95,12 +126,12 @@ public class CRUD {
 
         counterOfStudents++;
         String id = String.valueOf(counterOfStudents);
-        String lastName = readNonEmptyString("Enter Last Name: ");
-        String firstName = readNonEmptyString("Enter First Name: ");
-        String patronymic = readNonEmptyString("Enter Patronymic: ");
+        String lastName = readName("Enter Last Name: ");
+        String firstName = readName("Enter First Name: ");
+        String patronymic = readName("Enter Patronymic: ");
         LocalDate birthDate = readDate("Enter Birth Date");
-        String email = readNonEmptyString("Enter Email: ");
-        String phone = readNonEmptyString("Enter Phone Number: ");
+        String email = readEmail("Enter Email: ");
+        String phone = readPhone("Enter Phone Number: ");
         int grade = intInRange("Enter Grade (1-6): ", 1, 6);
         int group = intInRange("Enter Group (1-3): ", 1, 3);
         int year = intInRange("Enter Year of Entering: ", 2000, 2100);
@@ -229,9 +260,9 @@ public class CRUD {
 
         int choice = intInRange("Your choice: ", 0, 12);
         switch (choice) {
-            case 1 -> target.setLastName(readNonEmptyString("New Last Name: "));
-            case 2 -> target.setFirstName(readNonEmptyString("New First Name: "));
-            case 3 -> target.setPatronymic(readNonEmptyString("New Patronymic: "));
+            case 1 -> target.setLastName(readName("New Last Name: "));
+            case 2 -> target.setFirstName(readName("New First Name: "));
+            case 3 -> target.setPatronymic(readName("New Patronymic: "));
             case 4 -> target.setBirthDate(readDate("New Birth Date"));
             case 5 -> target.setEmail(readNonEmptyString("New Email: "));
             case 6 -> target.setPhone(readNonEmptyString("New Phone: "));
@@ -253,6 +284,10 @@ public class CRUD {
             case 12 -> {
                 Department newDept = chooseDepartment();
                 if (newDept != null) {
+                    if (newDept.equals(target.getDepartment())) {
+                        System.out.println("Student is already in this department.");
+                        break;
+                    }
                     if (target.getDepartment() != null) {
                         target.getDepartment().removeStudent(target);
                     }

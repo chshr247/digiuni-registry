@@ -39,6 +39,7 @@ public class RegistryStorageService {
         try {
             Files.createDirectories(DATA_DIR);
             if (Files.exists(LOCK_FILE)) {
+                // Перевіряємо чи процес з таким PID ще живий
                 try {
                     String pidStr = Files.readString(LOCK_FILE).trim();
                     long pid = Long.parseLong(pidStr);
@@ -52,10 +53,12 @@ public class RegistryStorageService {
                         return false;
                     }
                 } catch (Exception e2) {
+                    // Не вдалось прочитати PID — видаляємо застарілий lock
                     System.out.println("[Lock] Could not read lock file, removing stale lock.");
                     Files.deleteIfExists(LOCK_FILE);
                 }
             }
+            // Реєструємо Hook ДО створення файлу — щоб точно спрацював
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try { Files.deleteIfExists(LOCK_FILE); } catch (IOException ignored) {}
             }));
@@ -158,6 +161,7 @@ public class RegistryStorageService {
         try {
             if (!hasSavedFiles()) { System.out.println("No saved files found."); return; }
             clearAndLoad();
+            // Одразу перезаписуємо CSV — прибираємо з файлів пропущені битих рядки
             saveStudents();
             saveTeachers();
             System.out.println("Data loaded successfully.");

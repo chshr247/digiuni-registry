@@ -75,7 +75,7 @@ public class StreamReports {
     }
 
     private static void searchStudentByGroup() {
-        int group = CRUD.intInRange("Enter group (1-10): ", 1, 10);
+        int group = CRUD.intInRange("Enter group (1-3): ", 1, 3);
         List<Student> found = studentStream()
                 .filter(s -> s.getGroup() == group)
                 .sorted(Comparator.comparing(Student::getLastName))

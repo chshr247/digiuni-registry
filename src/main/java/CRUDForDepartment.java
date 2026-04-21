@@ -79,6 +79,9 @@ public class CRUDForDepartment {
         if (!headId.isEmpty()) {
             CRUDForTeacher.findTeacherByIdOptional(headId).ifPresentOrElse(
                     teacher -> {
+                        if (!d.getTeachers().contains(teacher)) {
+                            System.out.println("Warning: teacher does not belong to this department.");
+                        }
                         d.setHead(teacher);
                         System.out.println("Head set: " + teacher.getFullName());
                     },
@@ -138,6 +141,9 @@ public class CRUDForDepartment {
                 String headId = scanner.nextLine().trim();
                 CRUDForTeacher.findTeacherByIdOptional(headId).ifPresentOrElse(
                         teacher -> {
+                            if (!target.getTeachers().contains(teacher)) {
+                                System.out.println("Warning: teacher does not belong to this department.");
+                            }
                             target.setHead(teacher);
                             System.out.println("Head set: " + teacher.getFullName());
                         },

@@ -63,6 +63,11 @@ public class CRUDForFaculty {
         if (!deanId.isEmpty()) {
             CRUDForTeacher.findTeacherByIdOptional(deanId).ifPresentOrElse(
                     teacher -> {
+                        boolean belongsToFaculty = f.getDepartments().stream()
+                                .anyMatch(d -> d.getTeachers().contains(teacher));
+                        if (!belongsToFaculty) {
+                            System.out.println("Warning: teacher does not belong to any department of this faculty.");
+                        }
                         f.setDean(teacher);
                         System.out.println("Dean set: " + teacher.getFullName());
                     },
@@ -132,6 +137,11 @@ public class CRUDForFaculty {
                 String deanId = scanner.nextLine().trim();
                 CRUDForTeacher.findTeacherByIdOptional(deanId).ifPresentOrElse(
                         teacher -> {
+                            boolean belongsToFaculty = target.getDepartments().stream()
+                                    .anyMatch(d -> d.getTeachers().contains(teacher));
+                            if (!belongsToFaculty) {
+                                System.out.println("Warning: teacher does not belong to any department of this faculty.");
+                            }
                             target.setDean(teacher);
                             System.out.println("Dean set: " + teacher.getFullName());
                         },
