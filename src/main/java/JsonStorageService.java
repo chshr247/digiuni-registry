@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.regex.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -175,6 +176,7 @@ public class JsonStorageService {
                 CRUDForTeacher.findTeacherByIdOptional(ds.headId()).ifPresent(t -> { if (d != null) d.setHead(t); });
             }
 
+            recalculateCounters();
             System.out.println("JSON imported successfully.");
             System.out.println("  Faculties: " + CRUDForFaculty.faculties.size()
                     + ", Students: " + CRUD.students.size()
@@ -186,6 +188,7 @@ public class JsonStorageService {
             log.error("JSON IMPORT ERROR: {}", e.getMessage());
         }
     }
+
 
     private static University extractUniversity() {
         return CRUDForFaculty.faculties.stream()
@@ -209,5 +212,19 @@ public class JsonStorageService {
     private static Department findDepartmentById(String id) {
         if (id == null) return null;
         return allDepartments().filter(d -> d.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    private static void recalculateCounters() {
+        CRUD.counterOfStudents = maxId(CRUD.students.stream().map(Person::getId).toList());
+        CRUDForTeacher.counterOfTeachers = maxId(CRUDForTeacher.teachers.stream().map(Teacher::getId).toList());
+        CRUDForFaculty.counterOfFaculty = maxId(CRUDForFaculty.faculties.stream().map(Faculty::getId).toList());
+        CRUDForDepartment.counterOfDepartments = maxId(allDepartments().map(Department::getId).toList());
+    }
+
+    private static int maxId(java.util.List<String> ids) {
+        int max = 0;
+        for (String id : ids)
+            if (id != null && id.matches("\\d+")) max = Math.max(max, Integer.parseInt(id));
+        return max;
     }
 }

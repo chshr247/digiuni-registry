@@ -39,15 +39,28 @@ public class RegistryStorageService {
         try {
             Files.createDirectories(DATA_DIR);
             if (Files.exists(LOCK_FILE)) {
-                System.out.println("[Warning] Another instance may be running (lock file exists).");
-                System.out.println("  If no other instance is running, delete: " + LOCK_FILE.toAbsolutePath());
-                return false;
+                try {
+                    String pidStr = Files.readString(LOCK_FILE).trim();
+                    long pid = Long.parseLong(pidStr);
+                    boolean alive = ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false);
+                    if (!alive) {
+                        System.out.println("[Lock] Stale lock from dead process (PID " + pid + "), removing.");
+                        Files.deleteIfExists(LOCK_FILE);
+                    } else {
+                        System.out.println("[Warning] Another instance is already running (PID " + pid + ").");
+                        System.out.println("  If it is not running, delete: " + LOCK_FILE.toAbsolutePath());
+                        return false;
+                    }
+                } catch (Exception e2) {
+                    System.out.println("[Lock] Could not read lock file, removing stale lock.");
+                    Files.deleteIfExists(LOCK_FILE);
+                }
             }
-            Files.writeString(LOCK_FILE, String.valueOf(ProcessHandle.current().pid()),
-                    StandardOpenOption.CREATE_NEW);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try { Files.deleteIfExists(LOCK_FILE); } catch (IOException ignored) {}
             }));
+            Files.writeString(LOCK_FILE, String.valueOf(ProcessHandle.current().pid()),
+                    StandardOpenOption.CREATE_NEW);
             return true;
         } catch (IOException e) {
             System.out.println("[Lock error] " + e.getMessage());
@@ -145,6 +158,8 @@ public class RegistryStorageService {
         try {
             if (!hasSavedFiles()) { System.out.println("No saved files found."); return; }
             clearAndLoad();
+            saveStudents();
+            saveTeachers();
             System.out.println("Data loaded successfully.");
             log.info("DATA LOADED successfully");
         } catch (IOException e) {
