@@ -105,6 +105,20 @@ public class CRUDForUser {
             log.info("USER ROLE CHANGED username={} newRole={}", username, newRole);
             RegistryStorageService.saveUsersSilently();
         } else {
+            if (auth.getCurrentUser() != null && auth.getCurrentUser().getUsername().equals(username)) {
+                System.out.println("Error: cannot block the currently logged-in user.");
+                return;
+            }
+            boolean wouldBlock = !user.isBlocked();
+            if (wouldBlock && user.getRole() == Role.ADMIN) {
+                long activeAdmins = auth.getUsers().values().stream()
+                        .filter(u -> u.getRole() == Role.ADMIN && !u.isBlocked())
+                        .count();
+                if (activeAdmins <= 1) {
+                    System.out.println("Error: cannot block the last active admin.");
+                    return;
+                }
+            }
             user.setBlocked(!user.isBlocked());
             String status = user.isBlocked() ? "blocked" : "unblocked";
             System.out.println("User " + username + " is now " + status + ".");
@@ -117,6 +131,10 @@ public class CRUDForUser {
         String username = readNonEmptyString("Enter username to delete: ");
         if (auth.findUserOptional(username).isEmpty()) {
             System.out.println("User not found!");
+            return;
+        }
+        if (auth.getCurrentUser() != null && auth.getCurrentUser().getUsername().equals(username)) {
+            System.out.println("Error: cannot delete the currently logged-in user.");
             return;
         }
         auth.removeUser(username);
