@@ -1,0 +1,222 @@
+{
+  "university" : {
+    "fullName" : "National University of Kyiv-Mohyla Academy",
+    "shortName" : "NaUKMA",
+    "city" : "Kyiv",
+    "address" : "2, Skovorody St."
+  },
+  "faculties" : [ {
+    "id" : "1",
+    "fullName" : "Faculty of Computer Science",
+    "shortName" : "FI",
+    "contact" : "fi@ukma.edu.ua",
+    "deanId" : "1"
+  }, {
+    "id" : "2",
+    "fullName" : "Faculty of Economic Sciences",
+    "shortName" : "FEN",
+    "contact" : "fen@ukma.edu.ua",
+    "deanId" : "2"
+  }, {
+    "id" : "3",
+    "fullName" : "Faculty of Social Sciences and Social Technologies",
+    "shortName" : "FSNST",
+    "contact" : "fsnst@ukma.edu.ua",
+    "deanId" : "3"
+  } ],
+  "departments" : [ {
+    "id" : "1",
+    "fullName" : "Math",
+    "cabinet" : 301,
+    "facultyId" : "1",
+    "headId" : "1"
+  }, {
+    "id" : "2",
+    "fullName" : "Software Engineering",
+    "cabinet" : 302,
+    "facultyId" : "1",
+    "headId" : "4"
+  }, {
+    "id" : "3",
+    "fullName" : "Finance",
+    "cabinet" : 401,
+    "facultyId" : "2",
+    "headId" : "2"
+  }, {
+    "id" : "4",
+    "fullName" : "Sociology",
+    "cabinet" : 501,
+    "facultyId" : "3",
+    "headId" : "3"
+  } ],
+  "students" : [ {
+    "id" : "1",
+    "lastName" : "Mokliak",
+    "firstName" : "Viacheslav",
+    "patronymic" : "Vasilyovych",
+    "birthDate" : "2007-01-28",
+    "email" : "v.mokliak@ukma.edu.ua",
+    "phone" : "380509831589",
+    "grade" : 1,
+    "group" : 1,
+    "year" : 2024,
+    "formOfStudy" : "Budget",
+    "status" : "Studying",
+    "departmentId" : "4"
+  }, {
+    "id" : "2",
+    "lastName" : "Ivanov",
+    "firstName" : "Ivan",
+    "patronymic" : "Ivanovych",
+    "birthDate" : "2006-04-12",
+    "email" : "ivanov.i@ukma.edu.ua",
+    "phone" : "+380671110001",
+    "grade" : 2,
+    "group" : 1,
+    "year" : 2024,
+    "formOfStudy" : "Budget",
+    "status" : "Studying",
+    "departmentId" : "2"
+  }, {
+    "id" : "3",
+    "lastName" : "Petrov",
+    "firstName" : "Petro",
+    "patronymic" : "Petrovych",
+    "birthDate" : "2005-09-23",
+    "email" : "petrov.p@ukma.edu.ua",
+    "phone" : "+380671110002",
+    "grade" : 3,
+    "group" : 2,
+    "year" : 2023,
+    "formOfStudy" : "Contract",
+    "status" : "Studying",
+    "departmentId" : "1"
+  }, {
+    "id" : "4",
+    "lastName" : "Sydorenko",
+    "firstName" : "Anna",
+    "patronymic" : "Mykolaivna",
+    "birthDate" : "2007-01-15",
+    "email" : "sydorenko.a@ukma.edu.ua",
+    "phone" : "+380671110003",
+    "grade" : 1,
+    "group" : 1,
+    "year" : 2025,
+    "formOfStudy" : "Budget",
+    "status" : "Studying",
+    "departmentId" : "3"
+  }, {
+    "id" : "5",
+    "lastName" : "Kovalenko",
+    "firstName" : "Olena",
+    "patronymic" : "Serhiivna",
+    "birthDate" : "2006-11-30",
+    "email" : "kovalenko.o@ukma.edu.ua",
+    "phone" : "+380671110004",
+    "grade" : 2,
+    "group" : 3,
+    "year" : 2024,
+    "formOfStudy" : "Contract",
+    "status" : "Studying",
+    "departmentId" : "4"
+  }, {
+    "id" : "6",
+    "lastName" : "Tkachenko",
+    "firstName" : "Maksym",
+    "patronymic" : "Oleksandrovych",
+    "birthDate" : "2005-05-05",
+    "email" : "tkachenko.m@ukma.edu.ua",
+    "phone" : "+380671110005",
+    "grade" : 3,
+    "group" : 1,
+    "year" : 2023,
+    "formOfStudy" : "Budget",
+    "status" : "Studying",
+    "departmentId" : "2"
+  }, {
+    "id" : "7",
+    "lastName" : "Bondarenko",
+    "firstName" : "Yuliia",
+    "patronymic" : "Ihorivna",
+    "birthDate" : "2008-02-20",
+    "email" : "bondarenko.y@ukma.edu.ua",
+    "phone" : "+380671110006",
+    "grade" : 1,
+    "group" : 2,
+    "year" : 2025,
+    "formOfStudy" : "Contract",
+    "status" : "Studying",
+    "departmentId" : "3"
+  } ],
+  "teachers" : [ {
+    "id" : "1",
+    "lastName" : "Glybovets",
+    "firstName" : "Andriy",
+    "patronymic" : "Mykolayovych",
+    "birthDate" : "2007-01-28",
+    "email" : "a.glybovets@ukma.edu.ua",
+    "phone" : "+380509831589",
+    "post" : "Head",
+    "degree" : "Master",
+    "academicRank" : "Super",
+    "startedJobDate" : "2008-01-29",
+    "rate" : 10,
+    "departmentId" : "1"
+  }, {
+    "id" : "2",
+    "lastName" : "Lukianenko",
+    "firstName" : "Iryna",
+    "patronymic" : "Hryhorivna",
+    "birthDate" : "1970-05-15",
+    "email" : "lukianenko@ukma.edu.ua",
+    "phone" : "+380501112233",
+    "post" : "Head",
+    "degree" : "PhD",
+    "academicRank" : "Docent",
+    "startedJobDate" : "2005-09-01",
+    "rate" : 10,
+    "departmentId" : "3"
+  }, {
+    "id" : "3",
+    "lastName" : "Oksamytna",
+    "firstName" : "Svitlana",
+    "patronymic" : "Mykolaivna",
+    "birthDate" : "1968-11-20",
+    "email" : "oksamytna@ukma.edu.ua",
+    "phone" : "+380501112244",
+    "post" : "Head",
+    "degree" : "Doctor",
+    "academicRank" : "Professor",
+    "startedJobDate" : "2002-09-01",
+    "rate" : 10,
+    "departmentId" : "4"
+  }, {
+    "id" : "4",
+    "lastName" : "Taranuha",
+    "firstName" : "Volodymyr",
+    "patronymic" : "Yuriyovych",
+    "birthDate" : "1980-03-10",
+    "email" : "taranuha@ukma.edu.ua",
+    "phone" : "+380501112255",
+    "post" : "Head",
+    "degree" : "PhD",
+    "academicRank" : "Docent",
+    "startedJobDate" : "2010-09-01",
+    "rate" : 10,
+    "departmentId" : "2"
+  }, {
+    "id" : "5",
+    "lastName" : "Shevchenko",
+    "firstName" : "Taras",
+    "patronymic" : "Ivanovych",
+    "birthDate" : "1990-08-24",
+    "email" : "shevchenko.t@ukma.edu.ua",
+    "phone" : "+380501112266",
+    "post" : "Assistant",
+    "degree" : "Master",
+    "academicRank" : "None",
+    "startedJobDate" : "2020-09-01",
+    "rate" : 5,
+    "departmentId" : "1"
+  } ]
+}

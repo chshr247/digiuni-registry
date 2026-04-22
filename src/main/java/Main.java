@@ -1,3 +1,11 @@
+import auth.AuthService;
+import reflection.ReflectionModule;
+import report.StreamReports;
+import service.RegistryStorageService;
+import crud.*;
+import network.*;
+import model.*;
+import repository.*;
 public class Main {
     public static void main(String[] args) {
         AuthService auth = new AuthService();
